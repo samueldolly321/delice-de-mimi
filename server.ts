@@ -328,7 +328,7 @@ async function startServer() {
       requestedCustomerId: customerId ? sanitizeText(customerId, 50) : undefined,
     });
 
-    let notifResult = null;
+    let notifResult: Awaited<ReturnType<typeof sendOrderNotifications>> | null = null;
     try {
       notifResult = await sendOrderNotifications(newOrder, settings);
     } catch (notifErr) {

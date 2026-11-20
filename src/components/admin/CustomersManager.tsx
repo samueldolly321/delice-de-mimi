@@ -13,7 +13,7 @@ interface CustomersManagerProps {
 
 export const CustomersManager: React.FC<CustomersManagerProps> = ({
   customers,
-  orders = [],
+  orders = [] as Order[],
   settings,
   formatPrice,
 }) => {

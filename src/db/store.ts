@@ -882,7 +882,7 @@ export async function getSettings(): Promise<RestaurantSettings> {
     // Aucune ligne encore : on l'initialise avec les valeurs par défaut
     const [created] = await db
       .insert(schema.restaurantSettings)
-      .values({ id: 'default', ...toSettingsRow(INITIAL_SETTINGS) })
+      .values({ id: 'default', ...(toSettingsRow(INITIAL_SETTINGS) as Omit<typeof schema.restaurantSettings.$inferInsert, 'id'>) })
       .onConflictDoNothing()
       .returning();
     return created ? rowToSettings(created) : INITIAL_SETTINGS;
@@ -898,7 +898,6 @@ function toSettingsRow(s: Partial<RestaurantSettings>) {
   if (s.topBarText !== undefined) row.topBarText = s.topBarText;
   if (s.footerTagline !== undefined) row.footerTagline = s.footerTagline;
   if (s.footerCopyrightSuffix !== undefined) row.footerCopyrightSuffix = s.footerCopyrightSuffix;
-  if (s.loyaltyFreeSoupProductId !== undefined) row.loyaltyFreeSoupProductId = s.loyaltyFreeSoupProductId;
   if (s.loyaltyEnabled !== undefined) row.loyaltyEnabled = s.loyaltyEnabled;
   if (s.loyaltyFreeDeliveryEvery !== undefined) row.loyaltyFreeDeliveryEvery = s.loyaltyFreeDeliveryEvery;
   if (s.loyaltyFreeSoupEvery !== undefined) row.loyaltyFreeSoupEvery = s.loyaltyFreeSoupEvery;

@@ -1,4 +1,4 @@
-import { drizzle } from 'drizzle-orm/node-postgres';
+import { drizzle, type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import pg from 'pg';
 import * as schema from './schema';
 import dotenv from 'dotenv';
@@ -8,7 +8,7 @@ dotenv.config();
 const connectionString = process.env.DATABASE_URL;
 
 let pool: pg.Pool | null = null;
-let dbInstance: ReturnType<typeof drizzle<typeof schema>> | null = null;
+let dbInstance: NodePgDatabase<typeof schema> | null = null;
 
 export function getDb() {
   if (dbInstance) return dbInstance;
