@@ -99,7 +99,7 @@ export const SOUP_TOPPINGS: SoupTopping[] = [
     name: 'Crevettes entières marinées',
     price: 4000,
     icon: '🦐',
-    image: 'https://images.unsplash.com/photo-1559737558-245cb351c4a4?auto=format&fit=crop&w=800&q=85',
+    image: 'https://images.unsplash.com/photo-1633504581786-316c8002b1b9?auto=format&fit=crop&w=800&q=85',
     description: 'Grosses crevettes roses fraîches marinées au gingembre',
   },
   {
