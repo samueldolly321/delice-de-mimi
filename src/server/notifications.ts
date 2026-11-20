@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { deliveryFeeLabel, getDeliveryFeeStatus } from '../utils/delivery';
 import { Order, RestaurantSettings, ContactMessage } from '../types';
 
 export interface NotificationLog {
@@ -32,7 +33,11 @@ export function addNotificationLog(log: NotificationLog) {
 /**
  * Format a WhatsApp message for the manager with full order details
  */
-export function formatOrderWhatsAppText(order: Order, restaurantName = "Saveurs d'Asie"): string {
+export function formatOrderWhatsAppText(
+  order: Order,
+  restaurantName = "Saveurs d'Asie",
+  settings: Pick<RestaurantSettings, 'deliveryFee' | 'freeDeliveryThreshold'> = { deliveryFee: 4000, freeDeliveryThreshold: 0 }
+): string {
   const itemsList = order.items
     .map((it) => {
       let line = `• ${it.quantity}x ${it.name} (${(it.price * it.quantity).toLocaleString('fr-FR')} Ar)`;
@@ -75,9 +80,8 @@ ${order.customer.instructions ? `• Instructions : ${order.customer.instruction
 🍽️ PLATS COMMANDÉS :
 ${itemsList}
 ━━━━━━━━━━━━━━━━━━━━
-💰 Sous-total : ${order.subtotal.toLocaleString('fr-FR')} Ar
-🚚 Livraison : ${order.deliveryFee.toLocaleString('fr-FR')} Ar
-💵 TOTAL : ${order.total.toLocaleString('fr-FR')} Ar
+💰 Montant de la nourriture : ${order.subtotal.toLocaleString('fr-FR')} Ar
+🚚 + Frais de livraison : ${deliveryFeeLabel(order, settings)}
 💳 Règlement : ${paymentLabel}
 ━━━━━━━━━━━━━━━━━━━━
 Veuillez confirmer la réception et lancer la préparation en cuisine.`;
@@ -232,12 +236,12 @@ export function generateOrderEmailHtml(order: Order, settings: RestaurantSetting
       <div style="background-color: #fff9f0; border: 1px solid #ebdcc5; border-radius: 12px; padding: 18px; margin-top: 16px;">
         <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
           <tr>
-            <td style="padding: 4px 0; color: #666;">Sous-total plats :</td>
+            <td style="padding: 4px 0; color: #666;">Montant de la nourriture :</td>
             <td style="padding: 4px 0; text-align: right; font-weight: 600;">${order.subtotal.toLocaleString('fr-FR')} Ar</td>
           </tr>
           <tr>
-            <td style="padding: 4px 0; color: #666;">Frais de livraison :</td>
-            <td style="padding: 4px 0; text-align: right; font-weight: 600;">${order.deliveryFee.toLocaleString('fr-FR')} Ar</td>
+            <td style="padding: 4px 0; color: #666;">+ Frais de livraison :</td>
+            <td style="padding: 4px 0; text-align: right; font-weight: 600;">${deliveryFeeLabel(order, settings)}</td>
           </tr>
           <tr>
             <td style="padding: 4px 0; color: #666;">Mode de règlement :</td>
@@ -246,7 +250,9 @@ export function generateOrderEmailHtml(order: Order, settings: RestaurantSetting
           <tr style="border-top: 2px solid #ebdcc5;">
             <td style="padding: 10px 0 0 0; font-size: 16px; font-weight: 800; color: #C62828;">NET À PAYER :</td>
             <td style="padding: 10px 0 0 0; font-size: 18px; font-weight: 800; text-align: right; color: #C62828;">
-              ${order.total.toLocaleString('fr-FR')} Ar
+              ${getDeliveryFeeStatus(order, settings) === 'pending'
+                ? `${order.subtotal.toLocaleString('fr-FR')} Ar + livraison`
+                : `${order.total.toLocaleString('fr-FR')} Ar`}
             </td>
           </tr>
         </table>
@@ -317,7 +323,7 @@ export async function sendOrderNotifications(
   const isEmailEnabled = settings.notifyEmailEnabled !== false;
   const isWhatsappEnabled = settings.notifyWhatsappEnabled !== false;
 
-  const whatsAppText = formatOrderWhatsAppText(order, settings.name);
+  const whatsAppText = formatOrderWhatsAppText(order, settings.name, settings);
   const whatsAppUrl = generateWhatsAppLink(targetPhone, whatsAppText);
 
   const log: NotificationLog = {

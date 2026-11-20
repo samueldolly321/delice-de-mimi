@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { deliveryFeeLabel } from '../utils/delivery';
 import { X, CheckCircle2, Truck, Store, CreditCard, Banknote, Smartphone, ArrowLeft, Clock, MapPin, AlertCircle, UserCheck, LogIn } from 'lucide-react';
 import { ConfettiBurst } from './common/ConfettiBurst';
 import { useCart } from '../context/CartContext';
@@ -25,6 +26,8 @@ export const CheckoutModal: React.FC = () => {
     subtotal,
     deliveryFee,
     total,
+    isFreeDelivery,
+    minDeliveryFee,
     deliveryType,
     setDeliveryType,
     clearCart,
@@ -40,6 +43,15 @@ export const CheckoutModal: React.FC = () => {
     requireAuthToOrder,
     refreshOrders,
   } = useCustomerAuth();
+
+  // Aperçu de la récompense fidélité « livraison offerte » (calcul définitif côté serveur).
+  const willGetLoyaltyFreeDelivery =
+    isLoggedIn &&
+    !!authCustomer &&
+    settings.loyaltyEnabled !== false &&
+    deliveryType === 'delivery' &&
+    !isFreeDelivery &&
+    ((authCustomer.orderCount || 0) + 1) % (settings.loyaltyFreeDeliveryEvery || 5) === 0;
 
   const [customer, setCustomer] = useState<CustomerInfo>({
     fullName: '',
@@ -275,10 +287,14 @@ export const CheckoutModal: React.FC = () => {
                   </span>
                 </div>
                 <div className="flex justify-between items-baseline pt-2 border-t border-stone-200 text-sm font-bold">
-                  <span>Total payé/dû :</span>
+                  <span>Montant de la nourriture :</span>
                   <span className="font-serif text-base text-[#C62828]">
-                    {formatPrice(activeOrderConfirmation.total)}
+                    {formatPrice(activeOrderConfirmation.subtotal)}
                   </span>
+                </div>
+                <div className="flex justify-between text-stone-600">
+                  <span>+ Frais de livraison :</span>
+                  <span className="font-semibold">{deliveryFeeLabel(activeOrderConfirmation, settings)}</span>
                 </div>
               </div>
             </div>
@@ -629,7 +645,7 @@ export const CheckoutModal: React.FC = () => {
             const nextOrderNumber = (authCustomer.orderCount || 0) + 1;
             const freeDeliveryEvery = settings.loyaltyFreeDeliveryEvery || 5;
             const freeSoupEvery = settings.loyaltyFreeSoupEvery || 10;
-            const willGetFreeDelivery = nextOrderNumber % freeDeliveryEvery === 0;
+            const willGetFreeDelivery = deliveryType === 'delivery' && !isFreeDelivery && nextOrderNumber % freeDeliveryEvery === 0;
             const willGetFreeSoup = nextOrderNumber % freeSoupEvery === 0;
             if (!willGetFreeDelivery && !willGetFreeSoup) return null;
             return (
@@ -640,8 +656,10 @@ export const CheckoutModal: React.FC = () => {
                     C'est votre {nextOrderNumber}ème commande !
                   </p>
                   <p className="text-amber-700 mt-0.5">
-                    {willGetFreeSoup
+                    {willGetFreeSoup && willGetFreeDelivery
                       ? `Livraison offerte + ${settings.loyaltyFreeSoupName || 'un plat cadeau'} vous sera automatiquement ajouté(e) 🎁`
+                      : willGetFreeSoup
+                      ? `${settings.loyaltyFreeSoupName || 'Un plat cadeau'} vous sera automatiquement ajouté(e) 🎁`
                       : 'Livraison offerte sur cette commande'}
                   </p>
                 </div>
@@ -651,33 +669,27 @@ export const CheckoutModal: React.FC = () => {
 
           {/* Order Summary Recap */}
           <div className="bg-white p-4 rounded-2xl border border-[#EBDCC5] space-y-2 text-xs">
-            <div className="flex justify-between text-stone-600">
-              <span>Articles ({items.length})</span>
-              <span className="font-semibold text-[#1F1F1F]">{formatPrice(subtotal)}</span>
-            </div>
-            <div className="flex justify-between items-center text-stone-600">
-              <span>
-                Frais de livraison {deliveryType === 'takeaway' ? '(À récupérer)' : ''}
-              </span>
-              <span className="font-semibold">
-                {deliveryType === 'takeaway' ? (
-                  <span className="text-emerald-600 font-bold">Gratuit (sur place)</span>
-                ) : (
-                  <span className="text-[#C62828] font-bold">Dépendra de votre lieu</span>
-                )}
-              </span>
-            </div>
-            <div className="flex justify-between items-baseline pt-2 border-t border-stone-200 text-sm font-bold">
-              <div>
-                <span className="text-[#1F1F1F]">Total à payer</span>
-                {deliveryType === 'delivery' && (
-                  <span className="block text-[10px] text-stone-400 font-normal">
-                    Hors frais de livraison
-                  </span>
-                )}
-              </div>
+            <div className="flex justify-between items-baseline text-sm font-bold">
+              <span className="text-[#1F1F1F]">Montant de la nourriture ({items.length} article{items.length > 1 ? 's' : ''})</span>
               <span className="font-serif text-lg text-[#C62828]">{formatPrice(subtotal)}</span>
             </div>
+            <div className="flex justify-between items-center text-stone-600 pt-2 border-t border-stone-200">
+              <span>+ Frais de livraison</span>
+              <span className="font-semibold">
+                {deliveryType === 'takeaway' ? (
+                  <span className="text-emerald-600 font-bold">0 Ar (À récupérer)</span>
+                ) : isFreeDelivery || willGetLoyaltyFreeDelivery ? (
+                  <span className="text-emerald-600 font-bold">Offerte</span>
+                ) : (
+                  <span className="text-[#C62828] font-bold">à partir de {formatPrice(minDeliveryFee)}</span>
+                )}
+              </span>
+            </div>
+            {deliveryType === 'delivery' && !isFreeDelivery && !willGetLoyaltyFreeDelivery && (
+              <p className="text-[10px] text-stone-400 text-right">
+                Montant exact selon votre lieu, confirmé par notre équipe.
+              </p>
+            )}
           </div>
         </div>
 
@@ -692,7 +704,7 @@ export const CheckoutModal: React.FC = () => {
               <span>Validation en cours...</span>
             ) : (
               <>
-                <span>Confirmer la commande ({formatPrice(total)})</span>
+                <span>Confirmer la commande ({formatPrice(subtotal)}{deliveryType === 'delivery' && !isFreeDelivery && !willGetLoyaltyFreeDelivery ? ' + livraison' : ''})</span>
               </>
             )}
           </button>

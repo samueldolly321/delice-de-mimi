@@ -1,6 +1,8 @@
 import React, { useRef } from 'react';
+import { deliveryFeeLabel, getDeliveryFeeStatus } from '../../utils/delivery';
 import { X, Printer, CheckCircle, Store, Phone, MapPin, Download } from 'lucide-react';
 import { Order, RestaurantSettings } from '../../types';
+import { DeliveryFeePicker } from './DeliveryFeePicker';
 
 interface InvoiceModalN8Props {
   order: Order;
@@ -9,6 +11,8 @@ interface InvoiceModalN8Props {
   onClose: () => void;
   allOrders?: Order[];
   onSelectOrder?: (order: Order) => void;
+  /** Appelé quand l'admin choisit les frais de livraison depuis la facture. */
+  onOrderUpdated?: (order: Order) => void;
 }
 
 export const InvoiceModalN8: React.FC<InvoiceModalN8Props> = ({
@@ -16,6 +20,7 @@ export const InvoiceModalN8: React.FC<InvoiceModalN8Props> = ({
   settings,
   isOpen,
   onClose,
+  onOrderUpdated,
 }) => {
   const printRef = useRef<HTMLDivElement>(null);
 
@@ -41,6 +46,7 @@ export const InvoiceModalN8: React.FC<InvoiceModalN8Props> = ({
 
   const isTakeaway = order.deliveryType === 'takeaway' || (order.deliveryType as string) === 'pickup';
   const modeLabel = isTakeaway ? 'À récupérer' : 'Livraison';
+  const feeStatus = getDeliveryFeeStatus(order, settings);
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
@@ -110,7 +116,9 @@ export const InvoiceModalN8: React.FC<InvoiceModalN8Props> = ({
               type="button"
               onClick={handlePrint}
               id="print-invoice-btn"
-              className="bg-red-700 hover:bg-red-800 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md transition-all active:scale-95 cursor-pointer"
+              disabled={feeStatus === 'pending'}
+              title={feeStatus === 'pending' ? 'Choisissez d’abord les frais de livraison' : undefined}
+              className="bg-red-700 hover:bg-red-800 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md transition-all active:scale-95 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <Printer className="w-3.5 h-3.5" />
               <span>Imprimer</span>
@@ -129,6 +137,17 @@ export const InvoiceModalN8: React.FC<InvoiceModalN8Props> = ({
 
         {/* Scrollable Receipt Preview Area */}
         <div className="p-4 sm:p-6 pb-12 overflow-y-auto bg-stone-100 flex flex-col items-center flex-1 min-h-0">
+          {/* Choix des frais de livraison (non imprimé) */}
+          {!isTakeaway && (
+            <div className="no-print w-full max-w-[340px] mb-4">
+              {feeStatus === 'pending' && (
+                <p className="text-[11px] font-bold text-amber-800 mb-1.5">
+                  Choisissez les frais de livraison selon le lieu du client avant d’imprimer.
+                </p>
+              )}
+              <DeliveryFeePicker order={order} settings={settings} onSaved={(o) => onOrderUpdated?.(o)} />
+            </div>
+          )}
           <div
             id="facture-n8-container"
             ref={printRef}
@@ -285,26 +304,22 @@ export const InvoiceModalN8: React.FC<InvoiceModalN8Props> = ({
 
             {/* Financial Summary */}
             <div className="py-2.5 border-b-2 border-black space-y-1.5 text-xs">
-              <div className="flex justify-between">
-                <span>Sous-total articles :</span>
+              <div className="flex justify-between font-bold">
+                <span>Montant de la nourriture :</span>
                 <span>{formatAr(order.subtotal)}</span>
               </div>
 
               <div className="flex justify-between">
-                <span>Frais de livraison :</span>
-                <span>
-                  {isTakeaway
-                    ? '0 Ar (À récupérer)'
-                    : order.deliveryFee === 0
-                    ? '0 Ar (Offert)'
-                    : formatAr(order.deliveryFee)}
-                </span>
+                <span>+ Frais de livraison :</span>
+                <span>{deliveryFeeLabel(order, settings)}</span>
               </div>
 
               <div className="pt-2 border-t-2 border-black flex justify-between items-baseline text-sm font-black">
                 <span className="uppercase tracking-wider">TOTAL NET À PAYER :</span>
                 <span className="text-base font-bold">
-                  {formatAr(order.total)}
+                  {feeStatus === 'pending'
+                    ? `${formatAr(order.subtotal)} + livraison`
+                    : formatAr(order.total)}
                 </span>
               </div>
             </div>

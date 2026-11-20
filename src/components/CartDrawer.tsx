@@ -13,8 +13,8 @@ export const CartDrawer: React.FC = () => {
     updateQuantity,
     clearCart,
     subtotal,
-    deliveryFee,
-    total,
+    isFreeDelivery,
+    minDeliveryFee,
     deliveryType,
     setDeliveryType,
     formatPrice,
@@ -98,7 +98,7 @@ export const CartDrawer: React.FC = () => {
             </div>
 
             {/* Free Delivery Bar for delivery mode */}
-            {deliveryType === 'delivery' && (
+            {deliveryType === 'delivery' && settings.freeDeliveryThreshold > 0 && (
               <div className="mt-3">
                 {remainingForFreeDelivery > 0 ? (
                   <p className="text-[11px] text-stone-600 text-center">
@@ -238,40 +238,30 @@ export const CartDrawer: React.FC = () => {
               </div>
 
               <div className="space-y-1.5 pt-2 border-t border-stone-100 text-xs">
-                <div className="flex justify-between text-stone-600">
-                  <span>Sous-total</span>
-                  <span className="font-semibold text-[#1F1F1F]">{formatPrice(subtotal)}</span>
-                </div>
-
-                <div className="flex justify-between items-center text-stone-600">
-                  <span>
-                    Frais de livraison{' '}
-                    {deliveryType === 'takeaway' && (
-                      <span className="text-[10px] text-stone-400">(À récupérer)</span>
-                    )}
-                  </span>
-                  <span className="font-semibold text-right">
-                    {deliveryType === 'takeaway' ? (
-                      <span className="text-emerald-600 font-bold">Gratuit (sur place)</span>
-                    ) : (
-                      <span className="text-[#C62828] font-bold">Dépendra de votre lieu</span>
-                    )}
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-baseline pt-2 border-t border-stone-200 text-sm">
-                  <div>
-                    <span className="font-bold text-[#1F1F1F]">Total TTC</span>
-                    {deliveryType === 'delivery' && (
-                      <span className="block text-[10px] text-stone-400 font-normal">
-                        Hors frais de livraison
-                      </span>
-                    )}
-                  </div>
+                <div className="flex justify-between items-baseline text-sm">
+                  <span className="font-bold text-[#1F1F1F]">Montant de la nourriture</span>
                   <span className="font-serif text-lg font-extrabold text-[#C62828]">
                     {formatPrice(subtotal)}
                   </span>
                 </div>
+
+                <div className="flex justify-between items-center text-stone-600">
+                  <span>+ Frais de livraison</span>
+                  <span className="font-semibold text-right">
+                    {deliveryType === 'takeaway' ? (
+                      <span className="text-emerald-600 font-bold">0 Ar (À récupérer)</span>
+                    ) : isFreeDelivery ? (
+                      <span className="text-emerald-600 font-bold">Offerte</span>
+                    ) : (
+                      <span className="text-[#C62828] font-bold">à partir de {formatPrice(minDeliveryFee)}</span>
+                    )}
+                  </span>
+                </div>
+                {deliveryType === 'delivery' && !isFreeDelivery && (
+                  <p className="text-[10px] text-stone-400 text-right">
+                    Montant exact selon votre lieu, confirmé par notre équipe.
+                  </p>
+                )}
               </div>
 
               {/* Auth Status Notice */}

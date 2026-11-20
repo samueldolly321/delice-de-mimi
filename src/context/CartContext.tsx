@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { isFreeDeliveryBySubtotal } from '../utils/delivery';
 import { Product, CartItem, Order, RestaurantSettings, SoupTopping } from '../types';
 import { INITIAL_SETTINGS } from '../data/seedData';
 import { api } from '../services/api';
@@ -18,6 +19,10 @@ interface CartContextType {
   itemCount: number;
   subtotal: number;
   deliveryFee: number;
+  /** Livraison offerte (seuil de commande atteint). */
+  isFreeDelivery: boolean;
+  /** Frais de livraison minimum (« à partir de »). */
+  minDeliveryFee: number;
   total: number;
   isCartOpen: boolean;
   setIsCartOpen: (open: boolean) => void;
@@ -145,12 +150,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     0
   );
 
-  const deliveryFee =
-    deliveryType === 'takeaway' || subtotal === 0 || subtotal >= settings.freeDeliveryThreshold
-      ? 0
-      : settings.deliveryFee;
+  // Les frais de livraison exacts dépendent du lieu et sont fixés par l'équipe
+  // après la commande (« à partir de » settings.deliveryFee) : ils ne sont donc
+  // pas inclus dans le total affiché au client.
+  const deliveryFee = 0;
+  const isFreeDelivery = deliveryType === 'delivery' && isFreeDeliveryBySubtotal(subtotal, settings);
+  const minDeliveryFee = settings.deliveryFee;
 
-  const total = subtotal + deliveryFee;
+  const total = subtotal;
 
   const formatPrice = (val: number): string => {
     return `${val.toLocaleString('fr-FR')} ${settings.currency || 'Ar'}`;
@@ -167,6 +174,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         itemCount,
         subtotal,
         deliveryFee,
+        isFreeDelivery,
+        minDeliveryFee,
         total,
         isCartOpen,
         setIsCartOpen,

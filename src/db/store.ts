@@ -35,6 +35,7 @@ import {
   DeliveryType,
   PaymentMethod,
 } from '../types';
+import { isFreeDeliveryBySubtotal } from '../utils/delivery';
 
 const db = getDb();
 
@@ -748,7 +749,13 @@ export async function createOrder(input: CreateOrderInput): Promise<Order> {
       const freeDeliveryEvery = loyaltySettings.loyaltyFreeDeliveryEvery || 5;
       const freeSoupEvery = loyaltySettings.loyaltyFreeSoupEvery || 10;
 
-      const getsFreeDelivery = freeDeliveryEvery > 0 && upcomingOrderNumber % freeDeliveryEvery === 0 && input.deliveryType === 'delivery' && finalDeliveryFee > 0;
+      // Les frais exacts sont fixés plus tard par l'équipe : la récompense
+      // s'applique à toute livraison, sauf si elle est déjà offerte par le seuil.
+      const getsFreeDelivery =
+        freeDeliveryEvery > 0 &&
+        upcomingOrderNumber % freeDeliveryEvery === 0 &&
+        input.deliveryType === 'delivery' &&
+        !isFreeDeliveryBySubtotal(input.subtotal, loyaltySettings);
       const getsFreeSoup = freeSoupEvery > 0 && upcomingOrderNumber % freeSoupEvery === 0;
 
       if (getsFreeDelivery) {
@@ -848,13 +855,27 @@ export async function updateOrder(id: string, updates: Partial<Order>): Promise<
     const values: Record<string, unknown> = {};
     if (updates.status !== undefined) values.status = updates.status;
     if (updates.estimatedDelivery !== undefined) values.estimatedDelivery = updates.estimatedDelivery;
-    if (updates.total !== undefined) values.total = Math.round(updates.total);
+    if (updates.deliveryFee !== undefined) {
+      // Total toujours recalculé : sous-total des plats + frais de livraison.
+      const existing = await db.query.orders.findFirst({ where: eq(schema.orders.id, id) });
+      if (!existing) return null;
+      const fee = Math.max(0, Math.round(Number(updates.deliveryFee) || 0));
+      values.deliveryFee = fee;
+      values.total = existing.subtotal + fee;
+    }
+    if (Object.keys(values).length === 0) return getOrderById(id);
     const [row] = await db.update(schema.orders).set(values).where(eq(schema.orders.id, id)).returning();
     return row ? rowToOrder(row) : null;
   }
   const index = fileOrders.findIndex(o => o.id === id);
   if (index === -1) return null;
-  fileOrders[index] = { ...fileOrders[index], ...updates, id };
+  const current = fileOrders[index];
+  if (updates.status !== undefined) current.status = updates.status;
+  if (updates.estimatedDelivery !== undefined) current.estimatedDelivery = updates.estimatedDelivery;
+  if (updates.deliveryFee !== undefined) {
+    current.deliveryFee = Math.max(0, Math.round(Number(updates.deliveryFee) || 0));
+    current.total = current.subtotal + current.deliveryFee;
+  }
   persistFileStore();
   return fileOrders[index];
 }

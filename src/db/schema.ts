@@ -102,7 +102,7 @@ export const restaurantSettings = pgTable('restaurant_settings', {
   whatsappPhone: text('whatsapp_phone'),
   email: text('email').notNull(),
   openingHours: text('opening_hours').notNull(),
-  deliveryFee: integer('delivery_fee').default(3000).notNull(),
+  deliveryFee: integer('delivery_fee').default(4000).notNull(),
   freeDeliveryThreshold: integer('free_delivery_threshold').default(50000).notNull(),
   freeDeliveryNotice: text('free_delivery_notice').default('Livraison offerte dès 50 000 Ar'),
   facebookUrl: text('facebook_url').default(''),

@@ -616,7 +616,7 @@ export const INITIAL_SETTINGS: RestaurantSettings = {
   whatsappPhone: "+261 34 20 888 99",
   email: "contact@saveursdasie.mg",
   openingHours: "Du Lundi au Samedi : 10h00 - 21h30 | Dimanche : 11h00 - 20h30",
-  deliveryFee: 3000,
+  deliveryFee: 4000,
   freeDeliveryThreshold: 50000,
   freeDeliveryNotice: "Livraison offerte dès 50 000 Ar",
   facebookUrl: "https://facebook.com/saveursdasie",

@@ -5,6 +5,7 @@ import bcrypt from 'bcryptjs';
 import { createServer as createViteServer } from 'vite';
 import { ProductBadge, Product, OrderItem, Customer } from './src/types';
 import * as store from './src/db/store';
+import { SOUP_TOPPINGS } from './src/data/seedData';
 import {
   sendOrderNotifications,
   sendContactMessageNotification,
@@ -326,7 +327,7 @@ async function startServer() {
 
   // Public: Order placement with rate limiting & sanitization
   app.post('/api/orders', rateLimit(25, 60000, 'Trop de commandes passées récemment. Veuillez patienter.'), asyncHandler(async (req: Request, res: Response) => {
-    const { customer, items, deliveryType, paymentMethod, subtotal, deliveryFee, total, customerId } = req.body;
+    const { customer, items, deliveryType, paymentMethod, customerId } = req.body;
 
     if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ error: 'Le panier ne peut pas être vide.' });
@@ -345,20 +346,57 @@ async function startServer() {
       instructions: sanitizeText(customer.instructions ?? customer.notes, 500),
     };
 
-    const safeItems: OrderItem[] = items.map((it: any) => ({
-      productId: sanitizeText(it.productId || it.product?.id, 50) || `prod-${Date.now()}`,
-      name: sanitizeText(it.name || it.product?.name, 120) || 'Plat',
-      price: typeof it.price === 'number' && it.price >= 0 ? it.price : (typeof it.product?.price === 'number' && it.product.price >= 0 ? it.product.price : 0),
-      quantity: typeof it.quantity === 'number' && it.quantity > 0 ? Math.min(it.quantity, 100) : 1,
-      image: sanitizeText(it.image || it.product?.image, 500) || undefined,
-      toppings: Array.isArray(it.toppings) ? it.toppings.map((t: any) => sanitizeText(t, 50)) : undefined,
-    }));
+    const safeDeliveryType = deliveryType === 'takeaway' || deliveryType === 'pickup' ? 'takeaway' : 'delivery';
+    if (safeDeliveryType === 'delivery' && !safeCustomer.address) {
+      return res.status(400).json({ error: 'Veuillez renseigner une adresse de livraison.' });
+    }
+
+    // ---- Prix recalculés depuis la base (jamais repris du navigateur) ----
+    const catalog = await store.getProducts({});
+    const productsById = new Map(catalog.map((p) => [p.id, p]));
+    const safeItems: OrderItem[] = [];
+    for (const it of items as any[]) {
+      const productId = sanitizeText(it?.productId || it?.product?.id, 50);
+      const product = productId ? productsById.get(productId) : undefined;
+      if (!product) {
+        return res.status(400).json({ error: 'Un plat de votre panier n’existe plus. Veuillez rafraîchir la page.' });
+      }
+      if (!product.isAvailable) {
+        return res.status(400).json({ error: `« ${product.name} » n’est plus disponible pour le moment. Retirez-le de votre panier.` });
+      }
+
+      // Garnitures : seulement pour les plats personnalisables, prix lus dans la liste officielle.
+      const toppingNames: string[] = [];
+      let toppingsPrice = 0;
+      if (product.isCustomizable && Array.isArray(it.toppings)) {
+        for (const raw of it.toppings) {
+          const name = sanitizeText(typeof raw === 'string' ? raw : raw?.name, 120);
+          const topping = SOUP_TOPPINGS.find((t) => t.name === name || t.id === name);
+          if (!topping) {
+            return res.status(400).json({ error: `Garniture inconnue : « ${name} ». Veuillez rafraîchir la page.` });
+          }
+          toppingNames.push(topping.name);
+          toppingsPrice += topping.price;
+        }
+      }
+
+      const quantity = Number.isInteger(it.quantity) && it.quantity > 0 ? Math.min(it.quantity, 100) : 1;
+      safeItems.push({
+        productId: product.id,
+        name: product.name,
+        price: product.price + toppingsPrice,
+        quantity,
+        image: product.image || undefined,
+        toppings: toppingNames.length > 0 ? toppingNames : undefined,
+      });
+    }
 
     const settings = await store.getSettings();
-    const safeSubtotal = typeof subtotal === 'number' && subtotal >= 0 ? subtotal : 0;
-    const safeDeliveryFee = typeof deliveryFee === 'number' && deliveryFee >= 0 ? deliveryFee : settings.deliveryFee;
-    // Le total est recalculé côté serveur (jamais repris tel quel du client) ;
-    // le programme de fidélité (livraison/soupe offertes) est ensuite appliqué
+    const safeSubtotal = safeItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
+    // Frais de livraison : fixés ensuite par l'équipe selon le lieu
+    // (« à partir de » settings.deliveryFee) → 0 à la commande.
+    const safeDeliveryFee = 0;
+    // Le programme de fidélité (livraison/soupe offertes) est appliqué
     // par store.createOrder lui-même, à partir du nombre réel de commandes du client.
     const safeTotal = safeSubtotal + safeDeliveryFee;
 
@@ -368,8 +406,8 @@ async function startServer() {
       subtotal: safeSubtotal,
       deliveryFee: safeDeliveryFee,
       total: safeTotal,
-      deliveryType: deliveryType === 'takeaway' ? 'takeaway' : 'delivery',
-      paymentMethod: paymentMethod === 'orange_money' || paymentMethod === 'mvola' ? paymentMethod : 'cash_on_delivery',
+      deliveryType: safeDeliveryType,
+      paymentMethod: paymentMethod === 'pay_on_site' || paymentMethod === 'mobile_money' ? paymentMethod : 'cash_on_delivery',
       // Rattachement à un compte par identifiant : seulement avec une session valide
       // (sinon, rattachement par téléphone / email comme avant).
       requestedCustomerId: (() => {

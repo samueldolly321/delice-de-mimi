@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { getDeliveryFeeStatus } from '../../utils/delivery';
+import { DeliveryFeePicker } from './DeliveryFeePicker';
 import { Search, Filter, Eye, CheckCircle, Clock, Truck, Store, X, RefreshCw, Printer } from 'lucide-react';
 import { Order, OrderStatus, RestaurantSettings } from '../../types';
 import { api } from '../../services/api';
@@ -29,23 +31,11 @@ export const OrdersManager: React.FC<OrdersManagerProps> = ({ orders, settings, 
   const [invoiceOrder, setInvoiceOrder] = useState<Order | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
-  const DELIVERY_FEE_OPTIONS = [3000, 4000, 5000, 6000, 7000];
-
-  const handleDeliveryFeeChange = async (newFee: number) => {
-    if (!selectedOrder) return;
-    const newTotal = selectedOrder.subtotal + newFee;
-    const updated: Order = {
-      ...selectedOrder,
-      deliveryFee: newFee,
-      total: newTotal,
-    };
-    setSelectedOrder(updated);
-    try {
-      await api.updateOrder(selectedOrder.id, { deliveryFee: newFee, total: newTotal });
-      onRefresh();
-    } catch (err) {
-      console.error(err);
-    }
+  // Commande mise à jour (frais de livraison choisis) : on garde la fiche et la facture à jour.
+  const handleOrderUpdated = (updated: Order) => {
+    setSelectedOrder((prev) => (prev && prev.id === updated.id ? updated : prev));
+    setInvoiceOrder((prev) => (prev && prev.id === updated.id ? updated : prev));
+    onRefresh();
   };
 
   const currentSettings = settings || INITIAL_SETTINGS;
@@ -349,64 +339,18 @@ export const OrdersManager: React.FC<OrdersManagerProps> = ({ orders, settings, 
                     <span className="font-semibold text-stone-900">{formatPrice(selectedOrder.subtotal)}</span>
                   </div>
 
-                  {/* Frais de livraison modifiables sans restriction avant impression */}
-                  <div className="py-2.5 px-3 bg-amber-50/90 rounded-xl border border-amber-200/90 space-y-2 my-2">
-                    <div className="flex items-center justify-between">
-                      <label htmlFor="delivery-fee-input" className="font-bold text-amber-950 flex items-center gap-1.5 text-xs">
-                        <Truck className="w-3.5 h-3.5 text-[#C62828]" />
-                        <span>Frais de livraison (Ajustement libre) :</span>
-                      </label>
-                      <span className="font-bold text-[#C62828] text-xs">
-                        {formatPrice(selectedOrder.deliveryFee)}
-                      </span>
-                    </div>
-
-                    {/* Champ financier sans restriction (saisie libre de tout montant) */}
-                    <div className="flex items-center gap-2">
-                      <div className="relative flex-1">
-                        <input
-                          id="delivery-fee-input"
-                          type="number"
-                          min="0"
-                          step="any"
-                          value={selectedOrder.deliveryFee}
-                          onChange={(e) => handleDeliveryFeeChange(Math.max(0, Number(e.target.value) || 0))}
-                          className="w-full text-xs font-bold py-2 px-3 rounded-lg border border-amber-300 bg-white text-stone-800 shadow-2xs focus:outline-none focus:border-[#C62828]"
-                          placeholder="Montant libre en Ariary (ex: 3500)"
-                        />
-                      </div>
-                      <span className="text-xs font-bold text-stone-600 shrink-0">Ar</span>
-                    </div>
-
-                    {/* Boutons de sélection rapide */}
-                    <div>
-                      <div className="text-[10px] font-bold text-amber-950/80 mb-1">Suggestions rapides :</div>
-                      <div className="flex flex-wrap gap-1.5">
-                        {[0, 3000, 4000, 5000, 6000, 7000].map((fee) => (
-                          <button
-                            key={fee}
-                            type="button"
-                            onClick={() => handleDeliveryFeeChange(fee)}
-                            className={`px-2 py-1 rounded-md text-[11px] font-bold cursor-pointer transition-all ${
-                              selectedOrder.deliveryFee === fee
-                                ? 'bg-[#C62828] text-white shadow-2xs scale-102'
-                                : 'bg-white text-stone-700 border border-amber-200 hover:bg-amber-100/60'
-                            }`}
-                          >
-                            {fee === 0 ? 'Gratuit (0 Ar)' : `${fee.toLocaleString('fr-FR')} Ar`}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <p className="text-[10.5px] text-amber-900 leading-tight">
-                      Saisissez n'importe quel montant sans restriction ou cliquez sur un tarif rapide. La Facture et le total se mettent à jour automatiquement.
-                    </p>
+                  {/* Frais de livraison choisis par l'admin selon le lieu du client */}
+                  <div className="my-2">
+                    <DeliveryFeePicker order={selectedOrder} settings={currentSettings} onSaved={handleOrderUpdated} />
                   </div>
 
                   <div className="flex justify-between font-serif font-bold text-sm pt-2 text-[#C62828]">
                     <span>Total net de la commande</span>
-                    <span>{formatPrice(selectedOrder.total)}</span>
+                    <span>
+                      {getDeliveryFeeStatus(selectedOrder, currentSettings) === 'pending'
+                        ? `${formatPrice(selectedOrder.subtotal)} + livraison`
+                        : formatPrice(selectedOrder.total)}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -455,6 +399,7 @@ export const OrdersManager: React.FC<OrdersManagerProps> = ({ orders, settings, 
           onClose={() => setInvoiceOrder(null)}
           allOrders={orders}
           onSelectOrder={(ord) => setInvoiceOrder(ord)}
+          onOrderUpdated={handleOrderUpdated}
         />
       )}
     </div>

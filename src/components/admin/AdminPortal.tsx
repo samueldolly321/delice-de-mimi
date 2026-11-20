@@ -121,8 +121,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onClose, formatPrice }
           },
         ],
         subtotal: 31000,
-        deliveryFee: 3000,
-        total: 34000,
+        deliveryFee: 0,
+        total: 31000,
         deliveryType: 'delivery' as const,
         paymentMethod: 'cash_on_delivery' as const,
       };

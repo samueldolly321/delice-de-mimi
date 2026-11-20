@@ -1215,7 +1215,7 @@ SMTP_FROM="Saveurs d'Asie <contact@saveursdasie.mg>"`}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
             <div>
               <label className="font-semibold text-stone-700 block mb-1">
-                Frais de livraison standard (Ariary)
+                Frais de livraison minimum « à partir de » (Ariary)
               </label>
               <input
                 type="number"
@@ -1231,7 +1231,7 @@ SMTP_FROM="Saveurs d'Asie <contact@saveursdasie.mg>"`}
 
             <div>
               <label className="font-semibold text-stone-700 block mb-1">
-                Seuil de livraison gratuite (Ariary)
+                Seuil de livraison gratuite (Ariary, 0 = désactivé)
               </label>
               <input
                 type="number"
