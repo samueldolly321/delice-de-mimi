@@ -8,6 +8,15 @@ const ORDERS_KEY = 'saveurs_dasie_orders';
 const SETTINGS_KEY = 'saveurs_dasie_settings';
 const CUSTOMERS_KEY = 'saveurs_dasie_customers';
 const MESSAGES_KEY = 'saveurs_dasie_messages';
+const CUSTOMER_TOKEN_KEY = 'saveurs_customer_token';
+
+/** Levée quand le serveur refuse la session client (absente, expirée ou falsifiée). */
+export class CustomerSessionExpiredError extends Error {
+  constructor(message = 'Votre session a expiré. Veuillez vous reconnecter.') {
+    super(message);
+    this.name = 'CustomerSessionExpiredError';
+  }
+}
 
 // Helper to provide secure Authorization headers for admin calls
 const getAdminHeaders = (): Record<string, string> => {
@@ -373,7 +382,7 @@ export const api = {
   async createOrder(orderData: Omit<Order, 'id' | 'status' | 'createdAt'>): Promise<Order> {
     const res = await fetch('/api/orders', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: this.customerHeaders(),
       body: JSON.stringify(orderData),
     });
 
@@ -588,7 +597,19 @@ export const api = {
       localStorage.setItem('saveurs_customer_profile', JSON.stringify(customer));
     } else {
       localStorage.removeItem('saveurs_customer_profile');
+      localStorage.removeItem(CUSTOMER_TOKEN_KEY);
     }
+  },
+
+  /** Jeton de session remis par le serveur à la connexion / inscription. */
+  setCustomerToken(token: string | undefined): void {
+    if (token) localStorage.setItem(CUSTOMER_TOKEN_KEY, token);
+    else localStorage.removeItem(CUSTOMER_TOKEN_KEY);
+  },
+
+  customerHeaders(): Record<string, string> {
+    const token = localStorage.getItem(CUSTOMER_TOKEN_KEY);
+    return token ? { 'Content-Type': 'application/json', 'X-Customer-Token': token } : { 'Content-Type': 'application/json' };
   },
 
   async loginCustomer(identifier: string, password: string): Promise<{ success: boolean; customer?: Customer; orders?: Order[]; error?: string; notFound?: boolean }> {
@@ -602,6 +623,7 @@ export const api = {
       const data = await res.json();
       if (res.ok && data.success && data.customer) {
         this.setCurrentCustomer(data.customer);
+        this.setCustomerToken(data.token);
         return data;
       }
       if (res.status === 404 || data.notFound) {
@@ -644,6 +666,7 @@ export const api = {
       const resData = await res.json();
       if (res.ok && resData.success && resData.customer) {
         this.setCurrentCustomer(resData.customer);
+        this.setCustomerToken(resData.token);
         return resData;
       }
       return { success: false, error: resData.error || "Impossible d'enregistrer le profil." };
@@ -705,7 +728,7 @@ export const api = {
     try {
       const res = await fetch(`/api/customer/profile/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: this.customerHeaders(),
         body: JSON.stringify(updates),
       });
       const resData = await res.json();
@@ -713,9 +736,11 @@ export const api = {
         this.setCurrentCustomer(resData.customer);
         return resData;
       }
+      if (res.status === 401) throw new CustomerSessionExpiredError(resData?.error);
       // Le serveur a répondu mais a refusé : on remonte son message.
       return { success: false, error: resData?.error || "Impossible d'enregistrer vos coordonnées." };
-    } catch {
+    } catch (e) {
+      if (e instanceof CustomerSessionExpiredError) throw e;
       // Local fallback (serveur injoignable)
     }
 
@@ -732,12 +757,14 @@ export const api = {
 
   async getCustomerOrders(customerId: string, phone?: string, email?: string): Promise<Order[]> {
     try {
-      const res = await fetch(`/api/customer/${customerId}/orders`);
+      const res = await fetch(`/api/customer/${customerId}/orders`, { headers: this.customerHeaders() });
       if (res.ok) {
         return await res.json();
       }
-    } catch {
-      // Local fallback
+      if (res.status === 401) throw new CustomerSessionExpiredError();
+    } catch (e) {
+      if (e instanceof CustomerSessionExpiredError) throw e;
+      // Local fallback (serveur injoignable)
     }
 
     const allOrders: Order[] = JSON.parse(localStorage.getItem(ORDERS_KEY) || JSON.stringify(INITIAL_ORDERS));

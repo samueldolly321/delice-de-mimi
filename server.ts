@@ -59,6 +59,50 @@ async function startServer() {
     };
   };
 
+  // ===================== 2b. SESSIONS CLIENTS (jetons signés) =====================
+  // Jeton remis à la connexion / inscription : « <base64url(idClient.expiration)>.<signature HMAC> ».
+  // Sans état côté serveur : il reste valable après un redémarrage. La clé de
+  // signature vient de CUSTOMER_TOKEN_SECRET, sinon elle est dérivée des secrets
+  // du .env (impossible à deviner sans eux).
+  const CUSTOMER_TOKEN_TTL_MS = 30 * 24 * 3600 * 1000; // 30 jours
+  const customerTokenKey = crypto
+    .createHash('sha256')
+    .update('delice-mimi-session-client:' + (process.env.CUSTOMER_TOKEN_SECRET || process.env.DATABASE_URL || process.env.ADMIN_PASSWORD || crypto.randomBytes(32).toString('hex')))
+    .digest();
+  const signCustomerPayload = (payload: string) => crypto.createHmac('sha256', customerTokenKey).update(payload).digest('base64url');
+
+  const createCustomerToken = (customerId: string): string => {
+    const payload = Buffer.from(`${customerId}.${Date.now() + CUSTOMER_TOKEN_TTL_MS}`).toString('base64url');
+    return `${payload}.${signCustomerPayload(payload)}`;
+  };
+
+  /** Renvoie l'identifiant du client si le jeton est authentique et non expiré. */
+  const verifyCustomerToken = (token: unknown): string | null => {
+    if (typeof token !== 'string' || token.length > 300) return null;
+    const [payload, sig] = token.split('.');
+    if (!payload || !sig) return null;
+    const expected = Buffer.from(signCustomerPayload(payload));
+    const given = Buffer.from(sig);
+    if (expected.length !== given.length || !crypto.timingSafeEqual(expected, given)) return null;
+    const decoded = Buffer.from(payload, 'base64url').toString('utf8');
+    const dot = decoded.lastIndexOf('.');
+    const customerId = decoded.slice(0, dot);
+    const exp = Number(decoded.slice(dot + 1));
+    if (!customerId || !Number.isFinite(exp) || exp < Date.now()) return null;
+    return customerId;
+  };
+
+  const customerIdFromRequest = (req: Request) => verifyCustomerToken(req.headers['x-customer-token']);
+
+  /** Réservé au client connecté, et uniquement pour son propre compte (:id). */
+  const requireCustomerSelf = (req: Request, res: Response, next: NextFunction) => {
+    const customerId = customerIdFromRequest(req);
+    if (!customerId || customerId !== req.params.id) {
+      return res.status(401).json({ success: false, sessionExpired: true, error: 'Votre session a expiré. Veuillez vous reconnecter.' });
+    }
+    next();
+  };
+
   // ===================== 3. ADMIN AUTHENTICATION TOKENS =====================
   // Map token -> email de l'admin connecté (utile pour la route de changement de mot de passe)
   const validAdminTokens = new Map<string, string>();
@@ -326,7 +370,12 @@ async function startServer() {
       total: safeTotal,
       deliveryType: deliveryType === 'takeaway' ? 'takeaway' : 'delivery',
       paymentMethod: paymentMethod === 'orange_money' || paymentMethod === 'mvola' ? paymentMethod : 'cash_on_delivery',
-      requestedCustomerId: customerId ? sanitizeText(customerId, 50) : undefined,
+      // Rattachement à un compte par identifiant : seulement avec une session valide
+      // (sinon, rattachement par téléphone / email comme avant).
+      requestedCustomerId: (() => {
+        const sessionId = customerIdFromRequest(req);
+        return sessionId && (!customerId || sessionId === customerId) ? sessionId : undefined;
+      })(),
     });
 
     let notifResult: Awaited<ReturnType<typeof sendOrderNotifications>> | null = null;
@@ -387,7 +436,7 @@ async function startServer() {
     }
 
     const customerOrders = await store.getCustomerOrders(result.customer.id);
-    res.json({ success: true, customer: result.customer, orders: customerOrders });
+    res.json({ success: true, customer: result.customer, orders: customerOrders, token: createCustomerToken(result.customer.id) });
   }));
 
   app.post('/api/customer/register', rateLimit(10, 60000, 'Trop de créations de comptes.'), asyncHandler(async (req: Request, res: Response) => {
@@ -434,7 +483,7 @@ async function startServer() {
     const answerHash = await bcrypt.hash(safeAnswer.trim().toLowerCase(), 12);
     await store.setCustomerSecurityQA(newCustomer.id, safeQuestion, answerHash);
 
-    res.status(201).json({ success: true, customer: newCustomer, orders: [] });
+    res.status(201).json({ success: true, customer: newCustomer, orders: [], token: createCustomerToken(newCustomer.id) });
   }));
 
   // Étape 1 : récupérer la question de sécurité (sans jamais révéler la réponse)
@@ -466,7 +515,7 @@ async function startServer() {
     res.json({ success: true });
   }));
 
-  app.put('/api/customer/profile/:id', asyncHandler(async (req: Request, res: Response) => {
+  app.put('/api/customer/profile/:id', requireCustomerSelf, asyncHandler(async (req: Request, res: Response) => {
     const updates: Partial<Customer> = {};
     if (req.body.fullName) updates.fullName = sanitizeText(req.body.fullName, 100);
     if (req.body.phone) updates.phone = sanitizeText(req.body.phone, 30);
@@ -479,7 +528,7 @@ async function startServer() {
     res.json({ success: true, customer: updated });
   }));
 
-  app.get('/api/customer/:id/orders', asyncHandler(async (req: Request, res: Response) => {
+  app.get('/api/customer/:id/orders', requireCustomerSelf, asyncHandler(async (req: Request, res: Response) => {
     const cust = await store.getCustomerById(req.params.id);
     if (!cust) return res.status(404).json({ error: 'Client introuvable' });
     res.json(await store.getCustomerOrders(req.params.id));

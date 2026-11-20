@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Customer, Order } from '../types';
-import { api } from '../services/api';
+import { api, CustomerSessionExpiredError } from '../services/api';
 
 interface CustomerAuthContextType {
   customer: Customer | null;
@@ -41,6 +41,19 @@ export const CustomerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [authNotice, setAuthNotice] = useState<string | null>(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
+  // Session refusée par le serveur (absente, expirée) : on déconnecte proprement.
+  const endExpiredSession = (message: string, reopenLogin: boolean) => {
+    api.setCurrentCustomer(null);
+    setCustomer(null);
+    setCustomerOrders([]);
+    setIsProfileOpen(false);
+    setAuthNotice(message);
+    if (reopenLogin) {
+      setAuthModalMode('login');
+      setIsAuthModalOpen(true);
+    }
+  };
+
   const refreshOrders = async () => {
     if (!customer) {
       setCustomerOrders([]);
@@ -49,8 +62,8 @@ export const CustomerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
     try {
       const list = await api.getCustomerOrders(customer.id, customer.phone, customer.email);
       setCustomerOrders(list);
-    } catch {
-      // ignore
+    } catch (e) {
+      if (e instanceof CustomerSessionExpiredError) endExpiredSession(e.message, false);
     }
   };
 
@@ -101,7 +114,16 @@ export const CustomerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   const updateProfile = async (data: Partial<Customer>) => {
     if (!customer) return { success: false, error: 'Non connecté' };
-    const res = await api.updateCustomerProfile(customer.id, data);
+    let res;
+    try {
+      res = await api.updateCustomerProfile(customer.id, data);
+    } catch (e) {
+      if (e instanceof CustomerSessionExpiredError) {
+        endExpiredSession(e.message, true);
+        return { success: false, error: e.message };
+      }
+      throw e;
+    }
     if (res.success && res.customer) {
       setCustomer(res.customer);
       return { success: true };
