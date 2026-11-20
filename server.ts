@@ -297,7 +297,8 @@ async function startServer() {
       email: sanitizeText(customer.email, 100),
       address: sanitizeText(customer.address, 200),
       district: sanitizeText(customer.district, 80),
-      instructions: sanitizeText(customer.notes, 500),
+      // Le formulaire de commande envoie « instructions » (« notes » gardé pour compatibilité).
+      instructions: sanitizeText(customer.instructions ?? customer.notes, 500),
     };
 
     const safeItems: OrderItem[] = items.map((it: any) => ({

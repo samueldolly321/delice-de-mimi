@@ -713,8 +713,10 @@ export const api = {
         this.setCurrentCustomer(resData.customer);
         return resData;
       }
+      // Le serveur a répondu mais a refusé : on remonte son message.
+      return { success: false, error: resData?.error || "Impossible d'enregistrer vos coordonnées." };
     } catch {
-      // Local fallback
+      // Local fallback (serveur injoignable)
     }
 
     const cachedCustomers: Customer[] = JSON.parse(localStorage.getItem(CUSTOMERS_KEY) || JSON.stringify(INITIAL_CUSTOMERS));

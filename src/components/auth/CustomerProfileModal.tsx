@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   X,
   User,
@@ -42,7 +42,21 @@ export const CustomerProfileModal: React.FC = () => {
   const [address, setAddress] = useState(customer?.address || '');
   const [district, setDistrict] = useState(customer?.district || 'Antanimena');
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  // La fenêtre est montée dès le chargement de la page, avant la connexion :
+  // on recopie les coordonnées du client à chaque ouverture.
+  useEffect(() => {
+    if (!isProfileOpen || !customer) return;
+    setFullName(customer.fullName || '');
+    setPhone(customer.phone || '');
+    setEmail(customer.email || '');
+    setAddress(customer.address || '');
+    setDistrict(customer.district || 'Antanimena');
+    setSaveSuccess(false);
+    setSaveError(null);
+  }, [isProfileOpen, customer?.id]);
 
   if (!isProfileOpen || !customer) return null;
 
@@ -50,8 +64,9 @@ export const CustomerProfileModal: React.FC = () => {
     e.preventDefault();
     setSaving(true);
     setSaveSuccess(false);
+    setSaveError(null);
 
-    await updateProfile({
+    const res = await updateProfile({
       fullName: fullName.trim(),
       phone: phone.trim(),
       email: email.trim(),
@@ -60,8 +75,12 @@ export const CustomerProfileModal: React.FC = () => {
     });
 
     setSaving(false);
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 3000);
+    if (res.success) {
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } else {
+      setSaveError(res.error || "Impossible d'enregistrer vos coordonnées. Réessayez dans un instant.");
+    }
   };
 
   const getStatusBadge = (status: OrderStatus) => {
@@ -435,6 +454,12 @@ export const CustomerProfileModal: React.FC = () => {
                 <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 text-emerald-600" />
                   <span>Vos coordonnées ont été mises à jour avec succès !</span>
+                </div>
+              )}
+
+              {saveError && (
+                <div role="alert" className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-800">
+                  {saveError}
                 </div>
               )}
 
