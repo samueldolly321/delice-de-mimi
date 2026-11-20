@@ -13,3 +13,4 @@ mdp
 .data_store.json.backup-*
 server.js
 backups/
+apercus-themes/
