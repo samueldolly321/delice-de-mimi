@@ -1,0 +1,6 @@
+{
+  "name": "Saveurs d'Asie",
+  "description": "Restaurant asiatique d'exception & commande en ligne : soupes chinoises authentiques, mine sao, nems croustillants, sambos et spécialités faites maison.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

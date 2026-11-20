@@ -1,0 +1,14 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+
+# Secrets et données locales (ne jamais publier)
+mdp
+.data_store.json
+.data_store.json.backup-*
+server.js
