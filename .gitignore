@@ -12,3 +12,4 @@ mdp
 .data_store.json
 .data_store.json.backup-*
 server.js
+backups/

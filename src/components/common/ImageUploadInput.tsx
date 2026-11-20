@@ -1,6 +1,52 @@
 import React, { useRef, useState } from 'react';
 import { Upload, Image as ImageIcon, Link as LinkIcon, X, Check, FolderOpen } from 'lucide-react';
 
+const MAX_INPUT_BYTES = 15 * 1024 * 1024; // fichier choisi par l'utilisateur
+const MAX_OUTPUT_CHARS = 1.5 * 1024 * 1024; // data URL enregistrée
+const MAX_DIMENSION = 1600; // px, côté le plus long (suffit pour le diaporama plein écran)
+
+/**
+ * Redimensionne (côté le plus long ≤ MAX_DIMENSION) et recompresse une image.
+ * JPEG pour les photos ; WebP si l'image a de la transparence (logo détouré…).
+ */
+function compressImage(dataUrl: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, MAX_DIMENSION / Math.max(img.naturalWidth, img.naturalHeight));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(img.naturalWidth * k));
+      canvas.height = Math.max(1, Math.round(img.naturalHeight * k));
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return reject(new Error('canvas'));
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+      let transparent = false;
+      for (let i = 3; i < pixels.length; i += 4) {
+        if (pixels[i] < 250) { transparent = true; break; }
+      }
+
+      let out: string;
+      if (transparent) {
+        // WebP garde la transparence (un navigateur sans WebP renvoie du PNG).
+        out = canvas.toDataURL('image/webp', 0.85);
+      } else {
+        // Fond blanc sous l'image avant l'export JPEG.
+        ctx.globalCompositeOperation = 'destination-over';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        out = canvas.toDataURL('image/jpeg', 0.82);
+      }
+      // Ne jamais rendre une image plus lourde que l'originale.
+      resolve(out.length < dataUrl.length ? out : dataUrl);
+    };
+    img.onerror = () => reject(new Error('image illisible'));
+    img.src = dataUrl;
+  });
+}
+
 interface ImageUploadInputProps {
   value: string;
   onChange: (value: string) => void;
@@ -39,20 +85,36 @@ export const ImageUploadInput: React.FC<ImageUploadInputProps> = ({
       return;
     }
 
-    // Limite à 2 Mo par image.
-    // En base64 le poids augmente d'environ 33 %, et le formulaire des
-    // paramètres envoie logo + slides + photo du chef dans une seule
-    // requête : au-delà, on risque de dépasser la limite du serveur.
-    if (file.size > 2 * 1024 * 1024) {
-      setErrorMsg("L'image est trop volumineuse (max 2 Mo). Compressez-la avant de l'importer.");
+    // Les photos (souvent prises au téléphone) sont redimensionnées et
+    // recompressées avant d'être enregistrées : l'image est stockée en base64
+    // dans la base et renvoyée à chaque visiteur, donc chaque Ko compte.
+    if (file.size > MAX_INPUT_BYTES) {
+      setErrorMsg("L'image est trop volumineuse (max 15 Mo).");
       return;
     }
 
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       const dataUrl = event.target?.result as string;
-      if (dataUrl) {
+      if (!dataUrl) return;
+      // SVG et GIF (animations) : gardés tels quels.
+      if (file.type === 'image/svg+xml' || file.type === 'image/gif') {
+        if (dataUrl.length > MAX_OUTPUT_CHARS) {
+          setErrorMsg('Ce fichier est trop lourd. Utilisez une image JPG ou PNG.');
+          return;
+        }
         onChange(dataUrl);
+        return;
+      }
+      try {
+        const compressed = await compressImage(dataUrl);
+        if (compressed.length > MAX_OUTPUT_CHARS) {
+          setErrorMsg("L'image reste trop lourde après compression. Essayez une image plus simple.");
+          return;
+        }
+        onChange(compressed);
+      } catch {
+        setErrorMsg('Impossible de lire cette image. Essayez un fichier JPG ou PNG.');
       }
     };
     reader.onerror = () => {
@@ -142,7 +204,7 @@ export const ImageUploadInput: React.FC<ImageUploadInputProps> = ({
                 <span className="text-[#C62828] underline underline-offset-2">Cliquez pour importer depuis votre ordinateur</span> ou glissez-déposez
               </p>
               <p className="text-[10px] text-stone-500 mt-0.5">
-                PNG, JPG, WebP ou SVG jusqu'à 2 Mo
+                PNG, JPG, WebP ou SVG — compressée automatiquement
               </p>
             </div>
           </div>
