@@ -14,6 +14,7 @@ import { CustomerAuthModal } from './components/auth/CustomerAuthModal';
 import { CustomerProfileModal } from './components/auth/CustomerProfileModal';
 import { AdminLogin } from './components/admin/AdminLogin';
 import { AdminPortal } from './components/admin/AdminPortal';
+import { AdminErrorToast } from './components/admin/AdminErrorToast';
 import { api } from './services/api';
 
 function MainLayout() {
@@ -235,6 +236,7 @@ export default function App() {
     <CustomerAuthProvider>
       <CartProvider>
         <MainLayout />
+        <AdminErrorToast />
       </CartProvider>
     </CustomerAuthProvider>
   );

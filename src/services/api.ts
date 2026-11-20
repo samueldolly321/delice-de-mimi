@@ -48,6 +48,42 @@ const checkAdminAuthResponse = (res: Response) => {
   return true;
 };
 
+/** Événement affiché par <AdminErrorToast /> : l'admin voit toujours un échec d'enregistrement. */
+export const ADMIN_API_ERROR_EVENT = 'admin-api-error';
+
+const reportAdminError = (message: string): Error => {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent(ADMIN_API_ERROR_EVENT, { detail: message }));
+  }
+  return new Error(message);
+};
+
+/**
+ * Requête admin qui modifie des données. Pas de repli hors-ligne : si le
+ * serveur n'enregistre pas la modification, on lève une erreur (et on
+ * l'affiche) au lieu de la garder uniquement dans ce navigateur.
+ */
+async function adminRequest<T>(url: string, init: RequestInit = {}): Promise<T> {
+  let res: Response;
+  try {
+    res = await fetch(url, { ...init, headers: { ...getAdminHeaders(), ...(init.headers as Record<string, string> | undefined) } });
+  } catch {
+    throw reportAdminError("Serveur injoignable : la modification n'a pas été enregistrée. Vérifiez la connexion et réessayez.");
+  }
+  if (!checkAdminAuthResponse(res)) {
+    throw new Error('Session administrateur expirée. Veuillez vous reconnecter.');
+  }
+  if (res.status === 413) {
+    throw reportAdminError('Image trop volumineuse pour être enregistrée. Choisissez un fichier plus léger (moins de 2 Mo).');
+  }
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({} as { error?: string }));
+    throw reportAdminError(data.error || `La modification n'a pas été enregistrée (erreur serveur ${res.status}).`);
+  }
+  if (res.status === 204) return undefined as T;
+  return (await res.json().catch(() => undefined)) as T;
+}
+
 export const api = {
   // Products
   async getProducts(categoryId?: string, search?: string): Promise<Product[]> {
@@ -80,70 +116,15 @@ export const api = {
   },
 
   async createProduct(product: Partial<Product>): Promise<Product> {
-    try {
-      const res = await fetch('/api/products', {
-        method: 'POST',
-        headers: getAdminHeaders(),
-        body: JSON.stringify(product),
-      });
-      if (res.ok) return await res.json();
-    } catch {
-      // fallback
-    }
-
-    const cached = localStorage.getItem(PRODUCTS_KEY);
-    const list: Product[] = cached ? JSON.parse(cached) : [...INITIAL_PRODUCTS];
-    const newProd: Product = {
-      id: `prod-${Date.now()}`,
-      name: product.name || 'Nouveau Plat',
-      description: product.description || '',
-      price: typeof product.price === 'number' ? product.price : 10000,
-      categoryId: product.categoryId || 'cat-plats',
-      categoryName: product.categoryName || 'Plats',
-      image: product.image || 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=800&q=80',
-      badge: product.badge || null,
-      isAvailable: product.isAvailable !== undefined ? product.isAvailable : true,
-      preparationTime: product.preparationTime || '15 min',
-      spiceLevel: product.spiceLevel || 0,
-    };
-    list.unshift(newProd);
-    localStorage.setItem(PRODUCTS_KEY, JSON.stringify(list));
-    return newProd;
+    return adminRequest<Product>('/api/products', { method: 'POST', body: JSON.stringify(product) });
   },
 
   async updateProduct(id: string, updates: Partial<Product>): Promise<Product> {
-    try {
-      const res = await fetch(`/api/products/${id}`, {
-        method: 'PUT',
-        headers: getAdminHeaders(),
-        body: JSON.stringify(updates),
-      });
-      if (res.ok) return await res.json();
-    } catch {
-      // fallback
-    }
-
-    const cached = localStorage.getItem(PRODUCTS_KEY);
-    const list: Product[] = cached ? JSON.parse(cached) : [...INITIAL_PRODUCTS];
-    const index = list.findIndex(p => p.id === id);
-    if (index !== -1) {
-      list[index] = { ...list[index], ...updates };
-      localStorage.setItem(PRODUCTS_KEY, JSON.stringify(list));
-      return list[index];
-    }
-    throw new Error('Produit non trouvé');
+    return adminRequest<Product>(`/api/products/${id}`, { method: 'PUT', body: JSON.stringify(updates) });
   },
 
   async deleteProduct(id: string): Promise<boolean> {
-    try {
-      const res = await fetch(`/api/products/${id}`, {
-        method: 'DELETE',
-        headers: getAdminHeaders(),
-      });
-      if (res.ok) return true;
-    } catch {
-      // fallback
-    }
+    await adminRequest(`/api/products/${id}`, { method: 'DELETE' });
     const cached = localStorage.getItem(PRODUCTS_KEY);
     if (cached) {
       const list: Product[] = JSON.parse(cached);
@@ -186,28 +167,11 @@ export const api = {
     const localList: Category[] = cached ? JSON.parse(cached) : [...INITIAL_CATEGORIES];
 
     if (serverCats && Array.isArray(serverCats)) {
-      // Preserve any local categories that might not have reached server yet
-      const missingInServer = localList.filter(
-        (loc) => !serverCats!.some((srv) => srv.id === loc.id || (loc.slug && srv.slug === loc.slug))
-      );
-
-      let merged = [...serverCats];
-      if (missingInServer.length > 0) {
-        merged = [...serverCats, ...missingInServer];
-        // Background sync to server with admin headers
-        missingInServer.forEach((cat) => {
-          fetch('/api/categories', {
-            method: 'POST',
-            headers: getAdminHeaders(),
-            body: JSON.stringify(cat),
-          }).catch(() => {});
-        });
-      }
-
-      // Sort by order
-      merged.sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
-      localStorage.setItem(CATEGORIES_KEY, JSON.stringify(merged));
-      return merged;
+      // La liste du serveur fait foi (les catégories ne sont plus créées
+      // uniquement en local, donc rien à resynchroniser).
+      const sorted = [...serverCats].sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
+      localStorage.setItem(CATEGORIES_KEY, JSON.stringify(sorted));
+      return sorted;
     }
 
     return localList;
@@ -225,25 +189,12 @@ export const api = {
       order: typeof categoryData.order === 'number' ? categoryData.order : 99,
     };
 
-    let resultCategory: Category = payload;
+    const resultCategory = await adminRequest<Category>('/api/categories', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
 
-    try {
-      const res = await fetch('/api/categories', {
-        method: 'POST',
-        headers: getAdminHeaders(),
-        body: JSON.stringify(payload),
-      });
-      if (res.ok) {
-        resultCategory = await res.json();
-      } else {
-        const errJson = await res.json().catch(() => ({}));
-        console.warn('Erreur serveur création catégorie:', res.status, errJson);
-      }
-    } catch (err) {
-      console.warn('Erreur réseau création catégorie (sauvegarde locale):', err);
-    }
-
-    // Always update local storage
+    // Cache local mis à jour seulement après l'enregistrement sur le serveur
     const cached = localStorage.getItem(CATEGORIES_KEY);
     const list: Category[] = cached ? JSON.parse(cached) : [...INITIAL_CATEGORIES];
     const existingIdx = list.findIndex(c => c.id === resultCategory.id || c.slug === resultCategory.slug);
@@ -264,82 +215,52 @@ export const api = {
   },
 
   async updateCategory(id: string, updates: Partial<Category>): Promise<Category> {
-    let updatedCat: Category | null = null;
-    try {
-      const res = await fetch(`/api/categories/${id}`, {
-        method: 'PUT',
-        headers: getAdminHeaders(),
-        body: JSON.stringify(updates),
-      });
-      if (res.ok) {
-        updatedCat = await res.json();
-      }
-    } catch {
-      // fallback
-    }
-
-    const cached = localStorage.getItem(CATEGORIES_KEY);
-    const list: Category[] = cached ? JSON.parse(cached) : [...INITIAL_CATEGORIES];
-    const idx = list.findIndex(c => c.id === id);
-    if (idx !== -1) {
-      const current = list[idx];
-      const merged: Category = {
-        ...current,
-        ...(updatedCat || {}),
-        ...updates,
-        id,
-      };
-      list[idx] = merged;
-      localStorage.setItem(CATEGORIES_KEY, JSON.stringify(list));
-
-      if (updates.name) {
-        const prodsCached = localStorage.getItem(PRODUCTS_KEY);
-        if (prodsCached) {
-          const prods: Product[] = JSON.parse(prodsCached);
-          const updatedProds = prods.map(p => p.categoryId === id ? { ...p, categoryName: updates.name! } : p);
-          localStorage.setItem(PRODUCTS_KEY, JSON.stringify(updatedProds));
-        }
-      }
-
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('saveurs_categories_updated', { detail: merged }));
-      }
-
-      return merged;
-    }
-
-    if (updatedCat) return updatedCat;
-    throw new Error('Catégorie non trouvée');
-  },
-
-  async deleteCategory(id: string): Promise<boolean> {
-    try {
-      await fetch(`/api/categories/${id}`, {
-        method: 'DELETE',
-        headers: getAdminHeaders(),
-      });
-    } catch {
-      // fallback
-    }
+    const updatedCat = await adminRequest<Category>(`/api/categories/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+    });
+    const merged: Category = { ...updatedCat, id };
 
     const cached = localStorage.getItem(CATEGORIES_KEY);
     if (cached) {
       const list: Category[] = JSON.parse(cached);
-      const remaining = list.filter(c => c.id !== id);
-      localStorage.setItem(CATEGORIES_KEY, JSON.stringify(remaining));
-      const fallback = remaining.find(c => c.id !== 'cat-all') || { id: 'cat-plats', name: 'Plats' };
+      const idx = list.findIndex(c => c.id === id);
+      if (idx !== -1) {
+        list[idx] = { ...list[idx], ...merged };
+        localStorage.setItem(CATEGORIES_KEY, JSON.stringify(list));
+      }
+    }
+
+    if (updates.name) {
       const prodsCached = localStorage.getItem(PRODUCTS_KEY);
       if (prodsCached) {
         const prods: Product[] = JSON.parse(prodsCached);
-        const updatedProds = prods.map(p => p.categoryId === id ? { ...p, categoryId: fallback.id, categoryName: fallback.name } : p);
+        const updatedProds = prods.map(p => p.categoryId === id ? { ...p, categoryName: updates.name! } : p);
         localStorage.setItem(PRODUCTS_KEY, JSON.stringify(updatedProds));
       }
     }
 
     if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('saveurs_categories_updated', { detail: merged }));
+    }
+    return merged;
+  },
+
+  async deleteCategory(id: string): Promise<boolean> {
+    await adminRequest(`/api/categories/${id}`, { method: 'DELETE' });
+
+    const cached = localStorage.getItem(CATEGORIES_KEY);
+    if (cached) {
+      const list: Category[] = JSON.parse(cached);
+      localStorage.setItem(CATEGORIES_KEY, JSON.stringify(list.filter(c => c.id !== id)));
+    }
+    // Les plats de cette catégorie ont été réaffectés par le serveur : on vide
+    // le cache des plats pour qu'il soit rechargé.
+    localStorage.removeItem(PRODUCTS_KEY);
+
+    if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('saveurs_categories_updated'));
     }
-
     return true;
   },
 
@@ -397,49 +318,11 @@ export const api = {
   },
 
   async updateOrderStatus(id: string, status: OrderStatus): Promise<Order> {
-    try {
-      const res = await fetch(`/api/orders/${id}/status`, {
-        method: 'PUT',
-        headers: getAdminHeaders(),
-        body: JSON.stringify({ status }),
-      });
-      if (res.ok) return await res.json();
-    } catch {
-      // fallback
-    }
-
-    const cached = localStorage.getItem(ORDERS_KEY);
-    const list: Order[] = cached ? JSON.parse(cached) : [...INITIAL_ORDERS];
-    const order = list.find(o => o.id === id);
-    if (order) {
-      order.status = status;
-      localStorage.setItem(ORDERS_KEY, JSON.stringify(list));
-      return order;
-    }
-    throw new Error('Commande non trouvée');
+    return adminRequest<Order>(`/api/orders/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) });
   },
 
   async updateOrder(id: string, updates: Partial<Order>): Promise<Order> {
-    try {
-      const res = await fetch(`/api/orders/${id}`, {
-        method: 'PUT',
-        headers: getAdminHeaders(),
-        body: JSON.stringify(updates),
-      });
-      if (res.ok) return await res.json();
-    } catch {
-      // fallback
-    }
-
-    const cached = localStorage.getItem(ORDERS_KEY);
-    const list: Order[] = cached ? JSON.parse(cached) : [...INITIAL_ORDERS];
-    const index = list.findIndex(o => o.id === id);
-    if (index !== -1) {
-      list[index] = { ...list[index], ...updates };
-      localStorage.setItem(ORDERS_KEY, JSON.stringify(list));
-      return list[index];
-    }
-    throw new Error('Commande non trouvée');
+    return adminRequest<Order>(`/api/orders/${id}`, { method: 'PUT', body: JSON.stringify(updates) });
   },
 
   // Customers
@@ -473,34 +356,12 @@ export const api = {
   },
 
   async updateSettings(newSettings: Partial<RestaurantSettings>): Promise<RestaurantSettings> {
-    try {
-      const res = await fetch('/api/settings', {
-        method: 'PUT',
-        headers: getAdminHeaders(),
-        body: JSON.stringify(newSettings),
-      });
-      if (res.ok) return await res.json();
-
-      // Le serveur a répondu mais a refusé : on remonte une vraie erreur
-      // au lieu de faire croire à une sauvegarde réussie.
-      if (res.status === 413) {
-        throw new Error(
-          "Image trop volumineuse pour être enregistrée. Choisissez un logo plus léger (moins de 2 Mo)."
-        );
-      }
-      const detail = await res.text().catch(() => '');
-      throw new Error(`Échec de l'enregistrement (HTTP ${res.status}). ${detail}`);
-    } catch (err) {
-      // Seule une panne réseau doit basculer en mode hors-ligne
-      if (err instanceof TypeError) {
-        const cachedOffline = localStorage.getItem(SETTINGS_KEY);
-        const currentOffline = cachedOffline ? JSON.parse(cachedOffline) : INITIAL_SETTINGS;
-        const updatedOffline = { ...currentOffline, ...newSettings };
-        localStorage.setItem(SETTINGS_KEY, JSON.stringify(updatedOffline));
-        return updatedOffline;
-      }
-      throw err;
-    }
+    const saved = await adminRequest<RestaurantSettings>('/api/settings', {
+      method: 'PUT',
+      body: JSON.stringify(newSettings),
+    });
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(saved));
+    return saved;
   },
 
   // Notifications
@@ -864,58 +725,24 @@ export const api = {
   },
 
   async updateMessageStatus(id: string, status: 'new' | 'read' | 'treated'): Promise<ContactMessage> {
-    try {
-      const res = await fetch(`/api/messages/${id}/status`, {
-        method: 'PUT',
-        headers: getAdminHeaders(),
-        body: JSON.stringify({ status }),
-      });
-      if (res.ok) {
-        const updated = await res.json();
-        const cached = localStorage.getItem(MESSAGES_KEY);
-        if (cached) {
-          const list: ContactMessage[] = JSON.parse(cached);
-          const idx = list.findIndex(m => m.id === id);
-          if (idx !== -1) {
-            list[idx] = updated;
-            localStorage.setItem(MESSAGES_KEY, JSON.stringify(list));
-          }
-        }
-        return updated;
-      }
-    } catch {
-      // fallback
-    }
-
+    const updated = await adminRequest<ContactMessage>(`/api/messages/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    });
     const cached = localStorage.getItem(MESSAGES_KEY);
-    const list: ContactMessage[] = cached ? JSON.parse(cached) : [...INITIAL_MESSAGES];
-    const idx = list.findIndex(m => m.id === id);
-    if (idx !== -1) {
-      list[idx].status = status;
-      localStorage.setItem(MESSAGES_KEY, JSON.stringify(list));
-      return list[idx];
+    if (cached) {
+      const list: ContactMessage[] = JSON.parse(cached);
+      const idx = list.findIndex(m => m.id === id);
+      if (idx !== -1) {
+        list[idx] = updated;
+        localStorage.setItem(MESSAGES_KEY, JSON.stringify(list));
+      }
     }
-    throw new Error('Message non trouvé');
+    return updated;
   },
 
   async deleteMessage(id: string): Promise<boolean> {
-    try {
-      const res = await fetch(`/api/messages/${id}`, {
-        method: 'DELETE',
-        headers: getAdminHeaders(),
-      });
-      if (res.ok) {
-        const cached = localStorage.getItem(MESSAGES_KEY);
-        if (cached) {
-          const list: ContactMessage[] = JSON.parse(cached);
-          localStorage.setItem(MESSAGES_KEY, JSON.stringify(list.filter(m => m.id !== id)));
-        }
-        return true;
-      }
-    } catch {
-      // fallback
-    }
-
+    await adminRequest(`/api/messages/${id}`, { method: 'DELETE' });
     const cached = localStorage.getItem(MESSAGES_KEY);
     if (cached) {
       const list: ContactMessage[] = JSON.parse(cached);
