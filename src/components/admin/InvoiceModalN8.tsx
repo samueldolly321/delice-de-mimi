@@ -1,8 +1,9 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { deliveryFeeLabel, getDeliveryFeeStatus } from '../../utils/delivery';
 import { X, Printer, CheckCircle, Store, Phone, MapPin, Download } from 'lucide-react';
 import { Order, RestaurantSettings } from '../../types';
 import { DeliveryFeePicker } from './DeliveryFeePicker';
+import { printReceipt, getSavedPaperWidth, savePaperWidth, ReceiptPaperWidth } from '../../utils/printReceipt';
 
 interface InvoiceModalN8Props {
   order: Order;
@@ -23,11 +24,17 @@ export const InvoiceModalN8: React.FC<InvoiceModalN8Props> = ({
   onOrderUpdated,
 }) => {
   const printRef = useRef<HTMLDivElement>(null);
+  const [paperWidth, setPaperWidth] = useState<ReceiptPaperWidth>(getSavedPaperWidth);
 
   if (!isOpen) return null;
 
   const handlePrint = () => {
-    window.print();
+    printReceipt('facture-n8-container', paperWidth);
+  };
+
+  const choosePaperWidth = (width: ReceiptPaperWidth) => {
+    setPaperWidth(width);
+    savePaperWidth(width);
   };
 
   const formattedDate = new Date(order.createdAt).toLocaleDateString('fr-FR', {
@@ -50,49 +57,6 @@ export const InvoiceModalN8: React.FC<InvoiceModalN8Props> = ({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
-      {/* Print Specific CSS Inject - Unified 100% Monochrome Print (no half-yellow / half-black) */}
-      <style>{`
-        @media print {
-          @page {
-            margin: 0;
-            size: 80mm auto;
-          }
-          html, body {
-            margin: 0 !important;
-            padding: 0 !important;
-            background: #ffffff !important;
-            color: #000000 !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-          }
-          body * {
-            visibility: hidden !important;
-          }
-          #facture-n8-container, #facture-n8-container * {
-            visibility: visible !important;
-            color: #000000 !important;
-            background-color: transparent !important;
-            border-color: #000000 !important;
-            box-shadow: none !important;
-            text-shadow: none !important;
-          }
-          #facture-n8-container {
-            position: absolute !important;
-            left: 0 !important;
-            top: 0 !important;
-            width: 80mm !important;
-            max-width: 80mm !important;
-            margin: 0 !important;
-            padding: 4mm 5mm !important;
-            background: #ffffff !important;
-            color: #000000 !important;
-            font-family: 'Courier New', Courier, monospace, sans-serif !important;
-          }
-          .no-print {
-            display: none !important;
-          }
-        }
-      `}</style>
 
       <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-stone-300 overflow-hidden animate-in zoom-in-95 duration-200 text-stone-900 flex flex-col max-h-[92vh]">
         {/* Modal Toolbar (Non-printable) */}
@@ -106,12 +70,27 @@ export const InvoiceModalN8: React.FC<InvoiceModalN8Props> = ({
                 Impression Facture
               </h3>
               <p className="text-[11px] text-stone-300">
-                Ticket Caisse 80mm • Format optimisé • Prêt pour impression
+                Ticket de caisse {paperWidth} mm
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
+            <div className="flex rounded-lg bg-stone-800 p-0.5 text-[11px] font-bold" role="group" aria-label="Largeur du rouleau">
+              {([80, 58] as const).map((w) => (
+                <button
+                  key={w}
+                  type="button"
+                  onClick={() => choosePaperWidth(w)}
+                  title={`Rouleau de ${w} mm`}
+                  className={`px-2 py-1 rounded-md cursor-pointer transition-colors ${
+                    paperWidth === w ? 'bg-white text-stone-900' : 'text-stone-300 hover:text-white'
+                  }`}
+                >
+                  {w} mm
+                </button>
+              ))}
+            </div>
             <button
               type="button"
               onClick={handlePrint}
