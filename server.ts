@@ -15,7 +15,8 @@ import {
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  // Render (et la plupart des hébergeurs) imposent le port via la variable PORT.
+  const PORT = Number(process.env.PORT) || 3000;
 
   // Crée le compte admin initial (à partir du .env) s'il n'en existe encore aucun en base.
   await store.ensureAdminBootstrap();

@@ -1,0 +1,49 @@
+# Déploiement Render (Blueprint) : site web Node + base PostgreSQL.
+# Sur Render : New > Blueprint > choisir ce dépôt GitHub.
+services:
+  - type: web
+    name: delice-de-mimi
+    runtime: node
+    region: frankfurt
+    plan: free
+    # --include=dev : vite, esbuild et drizzle-kit sont nécessaires au build et au démarrage.
+    buildCommand: npm ci --include=dev && npm run build
+    # Crée / met à jour les tables avant de lancer le serveur.
+    startCommand: npm run db:push && npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "22"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: delice-de-mimi-db
+          property: connectionString
+      - key: CUSTOMER_TOKEN_SECRET
+        generateValue: true
+      # Valeurs à saisir dans le tableau de bord Render (jamais dans le dépôt) :
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: NOTIFICATION_EMAIL
+        sync: false
+      - key: NOTIFICATION_PHONE
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+
+databases:
+  - name: delice-de-mimi-db
+    region: frankfurt
+    plan: free
+    databaseName: delice_de_mimi
