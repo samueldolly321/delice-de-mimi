@@ -4,7 +4,8 @@ import { Product, Category } from '../types';
 import { ProductCard } from './ProductCard';
 import { SoupCustomizerModal } from './SoupCustomizerModal';
 import { api } from '../services/api';
-import { SOUP_TOPPINGS, INITIAL_PRODUCTS } from '../data/seedData';
+import { INITIAL_PRODUCTS } from '../data/seedData';
+import { resolveHomeContent } from '../data/homeContent';
 import { useCart } from '../context/CartContext';
 import { FadeIn } from './common/FadeIn';
 
@@ -19,7 +20,8 @@ export const MenuSection: React.FC<MenuSectionProps> = ({
   onOpenCustomizer: externalOpenCustomizer,
   onCloseCustomizer: externalCloseCustomizer,
 }) => {
-  const { formatPrice } = useCart();
+  const { settings } = useCart();
+  const home = resolveHomeContent(settings);
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -173,9 +175,9 @@ export const MenuSection: React.FC<MenuSectionProps> = ({
     <section id="menu" className="bg-paper py-24 md:py-28 relative scroll-mt-24">
       <div className="max-w-[1180px] mx-auto px-6 sm:px-10">
         {/* En-tête de section */}
-        <h2 className="section-title text-xl sm:text-2xl">La carte</h2>
+        <h2 className="section-title text-xl sm:text-2xl">{home.menuTitle}</h2>
         <p className="mt-8 max-w-md mx-auto text-center text-[15px] text-stone-500 leading-relaxed">
-          Des recettes généreuses, préparées à la commande avec des ingrédients frais.
+          {home.menuSubtitle}
         </p>
 
         {/* Onglets de catégories */}

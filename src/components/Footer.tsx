@@ -1,6 +1,7 @@
 import React from 'react';
 import { useCart } from '../context/CartContext';
 import { SocialIcon } from './SocialIcons';
+import { openCookieSettings } from '../utils/analytics';
 
 export const Footer: React.FC = () => {
   const { settings } = useCart();
@@ -78,8 +79,21 @@ export const Footer: React.FC = () => {
           </div>
         </div>
 
-        <div className="mt-16 pt-8 border-t border-white/10 text-center label-caps !font-normal text-[10px] text-white/40">
-          © {new Date().getFullYear()} {settings.name} · Tous droits réservés
+        <div className="mt-16 pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="text-center md:text-left">
+            <div className="label-caps !font-normal text-[10px] text-white/40">
+              © {new Date().getFullYear()} {settings.name} · {settings.footerCopyrightSuffix || 'Tous droits réservés.'}
+            </div>
+            {settings.footerTagline && <div className="mt-1.5 text-[12px] text-white/50">{settings.footerTagline}</div>}
+          </div>
+          <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-[12px]">
+            <a href="/mentions-legales" className="hover:text-white transition-colors">Mentions légales</a>
+            <a href="/conditions-generales" className="hover:text-white transition-colors">Conditions générales de vente</a>
+            <a href="/confidentialite" className="hover:text-white transition-colors">Confidentialité</a>
+            <button type="button" onClick={openCookieSettings} className="hover:text-white transition-colors cursor-pointer">
+              Gérer les cookies
+            </button>
+          </nav>
         </div>
       </div>
     </footer>

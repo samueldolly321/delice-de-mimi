@@ -20,6 +20,7 @@ import {
 import { useCustomerAuth } from '../../context/CustomerAuthContext';
 import { useCart } from '../../context/CartContext';
 import { OrderStatus } from '../../types';
+import { validateContactPair } from '../../utils/validation';
 
 export const CustomerProfileModal: React.FC = () => {
   const {
@@ -62,10 +63,20 @@ export const CustomerProfileModal: React.FC = () => {
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaving(true);
     setSaveSuccess(false);
     setSaveError(null);
 
+    if (!fullName.trim()) {
+      setSaveError('Veuillez renseigner votre nom complet.');
+      return;
+    }
+    const contactError = validateContactPair(phone, email);
+    if (contactError) {
+      setSaveError(contactError);
+      return;
+    }
+
+    setSaving(true);
     const res = await updateProfile({
       fullName: fullName.trim(),
       phone: phone.trim(),

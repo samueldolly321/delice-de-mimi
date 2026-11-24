@@ -5,7 +5,17 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
-    plugins: [react(), tailwindcss()],
+    plugins: [
+      react(),
+      tailwindcss(),
+      // En développement, remplace l'adresse du site dans les balises de partage.
+      // En production, c'est le serveur (server.ts) qui injecte la vraie adresse.
+      {
+        name: 'site-url-dev',
+        apply: 'serve' as const,
+        transformIndexHtml: (html: string) => html.split('__SITE_URL__').join('http://localhost:3000'),
+      },
+    ],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),

@@ -72,11 +72,10 @@ export const Hero: React.FC<HeroProps> = ({ onOpenCustomizer, isAdmin }) => {
   const { settings, refreshSettings } = useCart();
   const isActuallyAdmin = Boolean(isAdmin || api.isAuthenticated());
 
-  // Guarantee exactly 3 rich slides across the full width, with bulletproof fallbacks
-  const slides: HeroSlide[] = [0, 1, 2].map((idx) => {
-    const rawList = settings?.slides && Array.isArray(settings.slides) ? settings.slides : [];
-    const s = rawList[idx] || DEFAULT_HERO_SLIDES[idx] || DEFAULT_HERO_SLIDES[0];
-    const def = DEFAULT_HERO_SLIDES[idx] || DEFAULT_HERO_SLIDES[0];
+  // Toutes les diapositives définies dans l'administration (les 3 d'origine si aucune).
+  const rawList = settings?.slides && Array.isArray(settings.slides) && settings.slides.length > 0 ? settings.slides : DEFAULT_HERO_SLIDES;
+  const slides: HeroSlide[] = rawList.map((s, idx) => {
+    const def = DEFAULT_HERO_SLIDES[idx % DEFAULT_HERO_SLIDES.length];
 
     const title = (s && s.title && s.title.trim())
       ? s.title.trim()
@@ -95,9 +94,8 @@ export const Hero: React.FC<HeroProps> = ({ onOpenCustomizer, isAdmin }) => {
       ? s.image.trim()
       : def.image;
 
-    const tag = (s && s.tag && s.tag.trim())
-      ? s.tag.trim()
-      : def.tag;
+    // Petit titre : vide = pas de petit titre (choix de l'admin)
+    const tag = s && typeof s.tag === 'string' ? s.tag.trim() : def.tag;
 
     return {
       ...def,
@@ -275,7 +273,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenCustomizer, isAdmin }) => {
         {/* Navigation : flèches carrées noires + numéros */}
         <div className="absolute bottom-8 right-6 sm:right-10 z-30 flex items-center gap-4">
           <span className="font-display text-white/80 text-sm tracking-[0.2em]">
-            0{currentIndex + 1} <span className="text-white/40">/ 0{slides.length}</span>
+            {String(currentIndex + 1).padStart(2, '0')} <span className="text-white/40">/ {String(slides.length).padStart(2, '0')}</span>
           </span>
           <button
             type="button"

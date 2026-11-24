@@ -16,6 +16,47 @@ export interface SoupTopping {
   icon?: string;
   image?: string;
   description?: string;
+  /** false = garniture masquée et refusée à la commande (rupture de stock). */
+  isAvailable?: boolean;
+}
+
+/** Icônes proposées pour les engagements de la page d'accueil. */
+export type ServiceIconName = 'leaf' | 'chef' | 'soup' | 'bike' | 'clock' | 'heart' | 'star' | 'utensils' | 'award' | 'phone';
+
+export interface HomeServiceItem {
+  icon: ServiceIconName;
+  title: string;
+  text: string;
+}
+
+/**
+ * Textes et images de la page d'accueil modifiables depuis l'administration.
+ * Tout champ vide reprend la valeur par défaut (DEFAULT_HOME_CONTENT).
+ */
+export interface HomeContent {
+  // Section « Notre maison »
+  aboutTitle?: string;
+  aboutLabel?: string;
+  aboutButton?: string;
+  philosophyLabel?: string;
+  philosophyImage?: string;
+  // Bandeau soupe (3 panneaux)
+  soupBandTitle?: string;
+  soupBandText?: string;
+  soupBandButton?: string;
+  soupBandImageLeft?: string;
+  soupBandImageCenter?: string;
+  soupBandImageRight?: string;
+  // Section carte
+  menuTitle?: string;
+  menuSubtitle?: string;
+  // Section engagements
+  servicesTitle?: string;
+  servicesIntro?: string;
+  services?: HomeServiceItem[];
+  // Section contact
+  contactTitle?: string;
+  contactIntro?: string;
 }
 
 export interface Product {
@@ -170,6 +211,10 @@ export interface RestaurantSettings {
   invoiceNotice?: string;
   // Sliders & Histoire du Chef
   slides?: HeroSlide[];
+  /** Textes et images des sections de la page d'accueil. */
+  home?: HomeContent;
+  /** Garnitures de la soupe personnalisable (noms, prix, photos). */
+  soupToppings?: SoupTopping[];
   chef?: ChefInfo;
   // Notifications de commandes (Email & Téléphone / WhatsApp)
   notificationEmail?: string;

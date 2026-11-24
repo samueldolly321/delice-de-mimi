@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { X, User, Phone, Mail, MapPin, ArrowRight, ShieldCheck, AlertCircle, LogIn, UserPlus, Eye, EyeOff, HelpCircle, CheckCircle2 } from 'lucide-react';
 import { useCustomerAuth } from '../../context/CustomerAuthContext';
 import { api } from '../../services/api';
+import { isValidEmail, isValidPhone, HONEYPOT_FIELD } from '../../utils/validation';
 
 const SECURITY_QUESTIONS = [
   'Quel est le nom de votre premier animal de compagnie ?',
@@ -43,6 +44,9 @@ export const CustomerAuthModal: React.FC = () => {
   const [regSecurityQuestion, setRegSecurityQuestion] = useState(SECURITY_QUESTIONS[0]);
   const [regSecurityQuestionOther, setRegSecurityQuestionOther] = useState('');
   const [regSecurityAnswer, setRegSecurityAnswer] = useState('');
+  // Anti-spam : champ piège invisible + heure d'ouverture du formulaire
+  const [regHoneypot, setRegHoneypot] = useState('');
+  const regStartedAt = useRef(Date.now());
   const [regLoading, setRegLoading] = useState(false);
   const [regError, setRegError] = useState<string | null>(null);
 
@@ -159,6 +163,14 @@ export const CustomerAuthModal: React.FC = () => {
       setRegError(`Veuillez saisir votre ${regType === 'phone' ? 'numéro de téléphone' : 'adresse email'}.`);
       return;
     }
+    if (regType === 'phone' && !isValidPhone(regIdentifier)) {
+      setRegError('Le numéro de téléphone semble invalide (8 à 15 chiffres, ex. 034 12 345 67).');
+      return;
+    }
+    if (regType !== 'phone' && !isValidEmail(regIdentifier)) {
+      setRegError("L'adresse email semble invalide (ex. nom@exemple.com).");
+      return;
+    }
     if (!regPassword || regPassword.length < 6) {
       setRegError('Veuillez choisir un mot de passe d\'au moins 6 caractères.');
       return;
@@ -188,7 +200,11 @@ export const CustomerAuthModal: React.FC = () => {
       password: string;
       securityQuestion: string;
       securityAnswer: string;
+      website?: string;
+      formStartedAt?: number;
     } = {
+      [HONEYPOT_FIELD]: regHoneypot,
+      formStartedAt: regStartedAt.current,
       fullName: fullName.trim(),
       address: regAddress.trim(),
       district: finalDistrict,
@@ -550,6 +566,20 @@ export const CustomerAuthModal: React.FC = () => {
           ) : (
             /* ================= REGISTER TAB ================= */
             <form onSubmit={handleRegister} className="space-y-3.5">
+              {/* Champ piège anti-robots : invisible et ignoré par les humains */}
+              <div aria-hidden="true" className="absolute -left-[9999px] w-px h-px overflow-hidden">
+                <label>
+                  Ne pas remplir
+                  <input
+                    type="text"
+                    name={HONEYPOT_FIELD}
+                    tabIndex={-1}
+                    autoComplete="off"
+                    value={regHoneypot}
+                    onChange={(e) => setRegHoneypot(e.target.value)}
+                  />
+                </label>
+              </div>
               {/* Full Name */}
               <div>
                 <label className="block text-xs font-bold text-stone-800 mb-1">
@@ -753,6 +783,12 @@ export const CustomerAuthModal: React.FC = () => {
                     </>
                   )}
                 </button>
+                <p className="mt-3 text-[11px] text-stone-400 text-center leading-relaxed">
+                  En créant votre profil, vous acceptez nos{' '}
+                  <a href="/conditions-generales" target="_blank" className="underline hover:text-stone-600">conditions générales de vente</a>{' '}
+                  et notre{' '}
+                  <a href="/confidentialite" target="_blank" className="underline hover:text-stone-600">politique de confidentialité</a>.
+                </p>
               </div>
             </form>
           )}

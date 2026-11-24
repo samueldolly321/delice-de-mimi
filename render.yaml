@@ -22,6 +22,14 @@ services:
           property: connectionString
       - key: CUSTOMER_TOKEN_SECRET
         generateValue: true
+      # Adresse publique du site (sitemap, robots.txt, aperçus réseaux sociaux).
+      # Ex. https://delice-de-mimi.onrender.com ou votre nom de domaine.
+      - key: APP_URL
+        sync: false
+      # (Optionnel) Identifiant Google Analytics 4 « G-XXXXXXXXXX ».
+      # Vide = aucune mesure d'audience et pas de bandeau cookies.
+      - key: GA_MEASUREMENT_ID
+        sync: false
       # Valeurs à saisir dans le tableau de bord Render (jamais dans le dépôt) :
       - key: ADMIN_EMAIL
         sync: false

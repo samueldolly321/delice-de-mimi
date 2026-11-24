@@ -125,6 +125,9 @@ export const restaurantSettings = pgTable('restaurant_settings', {
   // Données dynamiques des slides hero et de la section chef
   slidesJson: jsonb('slides_json'),
   chefJson: jsonb('chef_json'),
+  // Textes/images des sections d'accueil et garnitures de la soupe (modifiables par l'admin)
+  homeJson: jsonb('home_json'),
+  toppingsJson: jsonb('toppings_json'),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 

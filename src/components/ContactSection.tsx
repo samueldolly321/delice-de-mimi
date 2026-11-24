@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   MapPin,
   Phone,
@@ -18,10 +18,14 @@ import { useCustomerAuth } from '../context/CustomerAuthContext';
 import { FadeIn } from './common/FadeIn';
 import { api } from '../services/api';
 import { SocialIcon } from './SocialIcons';
+import { validateContactPair, HONEYPOT_FIELD } from '../utils/validation';
+import { trackEvent } from '../utils/analytics';
+import { resolveHomeContent } from '../data/homeContent';
 import { ContactMessage, MessageRequestType } from '../types';
 
 export const ContactSection: React.FC = () => {
   const { settings } = useCart();
+  const home = resolveHomeContent(settings);
   const { customer: authCustomer } = useCustomerAuth();
 
   const [requestType, setRequestType] = useState<MessageRequestType>('reservation');
@@ -39,6 +43,9 @@ export const ContactSection: React.FC = () => {
   const [submittedMessage, setSubmittedMessage] = useState<ContactMessage | null>(null);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  // Anti-spam : champ piège invisible + heure d'ouverture du formulaire
+  const [honeypot, setHoneypot] = useState('');
+  const formStartedAt = useRef(Date.now());
 
   // Automatically prefill customer details if logged in
   useEffect(() => {
@@ -86,12 +93,13 @@ export const ContactSection: React.FC = () => {
       setErrorMessage('Veuillez indiquer votre nom.');
       return;
     }
-    if (!formState.email.trim() && !formState.phone.trim()) {
-      setErrorMessage('Veuillez renseigner au moins un numéro de téléphone ou une adresse email.');
+    const contactError = validateContactPair(formState.phone, formState.email);
+    if (contactError) {
+      setErrorMessage(contactError);
       return;
     }
-    if (!formState.message.trim()) {
-      setErrorMessage('Veuillez préciser votre message.');
+    if (formState.message.trim().length < 5) {
+      setErrorMessage('Veuillez préciser votre message (5 caractères minimum).');
       return;
     }
 
@@ -108,10 +116,13 @@ export const ContactSection: React.FC = () => {
         reservationTime: (requestType === 'reservation' || requestType === 'order_special') ? formState.reservationTime : undefined,
         guestsCount: requestType === 'reservation' ? Number(formState.guestsCount) : undefined,
         message: formState.message.trim(),
-      };
+        [HONEYPOT_FIELD]: honeypot,
+        formStartedAt: formStartedAt.current,
+      } as Partial<ContactMessage>;
 
       const created = await api.createMessage(payload);
       setSubmittedMessage(created);
+      trackEvent('generate_lead', { request_type: requestType });
     } catch (err: any) {
       console.error('Erreur envoi message:', err);
       setErrorMessage(err.message || "Une erreur est survenue lors de l'envoi de votre message. Veuillez réessayer.");
@@ -246,10 +257,10 @@ export const ContactSection: React.FC = () => {
         {/* Section Header */}
         <FadeIn>
         <div className="text-center max-w-3xl mx-auto mb-14 md:mb-16">
-          <h2 className="section-title text-xl sm:text-2xl">Accès & réservation</h2>
+          <h2 className="section-title text-xl sm:text-2xl">{home.contactTitle}</h2>
 
           <p className="mt-8 max-w-xl mx-auto text-[15px] text-stone-500 leading-relaxed">
-            Une question sur la carte, une réservation de table ou un événement d'entreprise ? Écrivez-nous directement ici.
+            {home.contactIntro}
           </p>
         </div>
         </FadeIn>
@@ -508,7 +519,21 @@ export const ContactSection: React.FC = () => {
                 </div>
               ) : (
                 /* Form Fields */
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+                  {/* Champ piège anti-robots : invisible et ignoré par les humains */}
+                  <div aria-hidden="true" className="absolute -left-[9999px] w-px h-px overflow-hidden">
+                    <label>
+                      Ne pas remplir
+                      <input
+                        type="text"
+                        name={HONEYPOT_FIELD}
+                        tabIndex={-1}
+                        autoComplete="off"
+                        value={honeypot}
+                        onChange={(e) => setHoneypot(e.target.value)}
+                      />
+                    </label>
+                  </div>
                   {errorMessage && (
                     <div className="p-3 bg-red-50 text-red-700 rounded-xl border border-red-200 text-xs flex items-center gap-2 animate-in fade-in">
                       <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
@@ -776,7 +801,8 @@ export const ContactSection: React.FC = () => {
                   </button>
 
                   <p className="text-[11px] text-stone-400 text-center">
-                    En validant ce formulaire, vos informations sont enregistrées et traitées par le restaurant dans le respect de votre vie privée.
+                    Vos informations servent uniquement à traiter votre demande. Voir notre{' '}
+                    <a href="/confidentialite" className="underline hover:text-stone-600">politique de confidentialité</a>.
                   </p>
                 </form>
               )}

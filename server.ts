@@ -5,7 +5,10 @@ import bcrypt from 'bcryptjs';
 import { createServer as createViteServer } from 'vite';
 import { ProductBadge, Product, OrderItem, Customer } from './src/types';
 import * as store from './src/db/store';
-import { SOUP_TOPPINGS } from './src/data/seedData';
+import { resolveAvailableToppings } from './src/data/homeContent';
+import { HomeContent, HomeServiceItem, SoupTopping, ServiceIconName } from './src/types';
+import fs from 'fs';
+import { validateContactPair, HONEYPOT_FIELD } from './src/utils/validation';
 import {
   sendOrderNotifications,
   sendContactMessageNotification,
@@ -21,8 +24,29 @@ async function startServer() {
   // Crée le compte admin initial (à partir du .env) s'il n'en existe encore aucun en base.
   await store.ensureAdminBootstrap();
 
+  const isProduction = process.env.NODE_ENV === 'production';
+
+  // Render (comme la plupart des hébergeurs) place un proxy devant l'application :
+  // on lui fait confiance pour connaître la vraie IP et le protocole (http/https).
+  app.set('trust proxy', 1);
+
+  // ===================== 0. HTTPS OBLIGATOIRE (production) =====================
+  // Toute visite en http:// est redirigée de façon permanente vers https://.
+  if (isProduction) {
+    app.use((req: Request, res: Response, next: NextFunction) => {
+      if (req.headers['x-forwarded-proto'] === 'http') {
+        return res.redirect(301, `https://${req.headers.host}${req.originalUrl}`);
+      }
+      next();
+    });
+  }
+
   // ===================== 1. SECURITY HEADERS & BODY LIMIT =====================
   app.use((_req: Request, res: Response, next: NextFunction) => {
+    if (isProduction) {
+      // Le navigateur retient qu'il doit toujours utiliser HTTPS pour ce site (1 an).
+      res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    }
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Frame-Options', 'SAMEORIGIN');
     res.setHeader('X-XSS-Protection', '1; mode=block');
@@ -141,6 +165,19 @@ async function startServer() {
         }
       });
     };
+
+  // ===================== 3b. ANTI-SPAM =====================
+  // Deux pièges invisibles pour les humains :
+  //  - un champ caché « website » que seuls les robots remplissent ;
+  //  - l'heure d'ouverture du formulaire : un envoi en moins de 3 secondes
+  //    n'est pas humain.
+  const looksLikeSpam = (body: Record<string, unknown>): boolean => {
+    const trap = body?.[HONEYPOT_FIELD];
+    if (typeof trap === 'string' && trap.trim() !== '') return true;
+    const startedAt = Number(body?.formStartedAt);
+    if (Number.isFinite(startedAt) && startedAt > 0 && Date.now() - startedAt < 3000) return true;
+    return false;
+  };
 
   // ===================== 4. INPUT SANITIZATION UTILITIES =====================
   const sanitizeText = (val: unknown, maxLen = 300): string => {
@@ -336,6 +373,8 @@ async function startServer() {
     if (!customer || !customer.fullName || (!customer.phone && !customer.email)) {
       return res.status(400).json({ error: 'Données de commande incomplètes (Nom et téléphone ou email requis)' });
     }
+    const orderContactError = validateContactPair(customer.phone, customer.email);
+    if (orderContactError) return res.status(400).json({ error: orderContactError });
 
     const safeCustomer = {
       fullName: sanitizeText(customer.fullName, 100),
@@ -355,6 +394,8 @@ async function startServer() {
     // ---- Prix recalculés depuis la base (jamais repris du navigateur) ----
     const catalog = await store.getProducts({});
     const productsById = new Map(catalog.map((p) => [p.id, p]));
+    // Garnitures officielles (liste modifiable par l'admin) : seules celles disponibles sont acceptées.
+    const availableToppings = resolveAvailableToppings(await store.getSettings());
     const safeItems: OrderItem[] = [];
     for (const it of items as any[]) {
       const productId = sanitizeText(it?.productId || it?.product?.id, 50);
@@ -372,7 +413,7 @@ async function startServer() {
       if (product.isCustomizable && Array.isArray(it.toppings)) {
         for (const raw of it.toppings) {
           const name = sanitizeText(typeof raw === 'string' ? raw : raw?.name, 120);
-          const topping = SOUP_TOPPINGS.find((t) => t.name === name || t.id === name);
+          const topping = availableToppings.find((t) => t.name === name || t.id === name);
           if (!topping) {
             return res.status(400).json({ error: `Garniture inconnue : « ${name} ». Veuillez rafraîchir la page.` });
           }
@@ -488,8 +529,12 @@ async function startServer() {
     const safeQuestion = sanitizeText(securityQuestion, 150);
     const safeAnswer = sanitizeText(securityAnswer, 100);
 
+    if (looksLikeSpam(req.body)) {
+      return res.status(400).json({ success: false, error: 'Inscription impossible. Veuillez réessayer dans quelques secondes.' });
+    }
     if (!safeName) return res.status(400).json({ success: false, error: 'Veuillez renseigner votre nom complet.' });
-    if (!safePhone && !safeEmail) return res.status(400).json({ success: false, error: 'Veuillez renseigner au moins un numéro de téléphone ou une adresse email.' });
+    const registerContactError = validateContactPair(safePhone, safeEmail);
+    if (registerContactError) return res.status(400).json({ success: false, error: registerContactError });
     if (!password || String(password).length < 6) {
       return res.status(400).json({ success: false, error: 'Veuillez choisir un mot de passe d\'au moins 6 caractères.' });
     }
@@ -561,6 +606,10 @@ async function startServer() {
     if (req.body.email) updates.email = sanitizeText(req.body.email, 100);
     if (req.body.address) updates.address = sanitizeText(req.body.address, 200);
     if (req.body.district) updates.district = sanitizeText(req.body.district, 80);
+    if (updates.phone || updates.email) {
+      const profileContactError = validateContactPair(updates.phone || undefined, updates.email || undefined);
+      if (profileContactError) return res.status(400).json({ success: false, error: profileContactError });
+    }
 
     const updated = await store.updateCustomerProfile(req.params.id, updates);
     if (!updated) return res.status(404).json({ success: false, error: 'Profil client introuvable' });
@@ -628,9 +677,23 @@ async function startServer() {
   }));
 
   // ===================== SETTINGS API =====================
-  app.get('/api/settings', asyncHandler(async (_req: Request, res: Response) => {
-    res.json(await store.getSettings());
+  // Les coordonnées et réglages de notification du gérant ne sont envoyés qu'à l'admin connecté.
+  const PRIVATE_SETTINGS_KEYS = ['notificationEmail', 'notificationPhone', 'notifyEmailEnabled', 'notifySoundEnabled', 'notifyWhatsappEnabled'];
+  app.get('/api/settings', asyncHandler(async (req: Request, res: Response) => {
+    const settings = await store.getSettings();
+    const auth = req.headers.authorization || '';
+    const token = auth.startsWith('Bearer ') ? auth.split(' ')[1] : '';
+    if (token && validAdminTokens.has(token)) return res.json(settings);
+    const publicSettings: Record<string, unknown> = { ...settings };
+    for (const key of PRIVATE_SETTINGS_KEYS) delete publicSettings[key];
+    res.json(publicSettings);
   }));
+
+  // Configuration publique du site (aucun secret ici) : identifiant de mesure d'audience.
+  app.get('/api/public-config', (_req: Request, res: Response) => {
+    const gaId = (process.env.GA_MEASUREMENT_ID || '').trim();
+    res.json({ gaMeasurementId: /^G-[A-Z0-9]{4,20}$/i.test(gaId) ? gaId : null });
+  });
 
   app.put('/api/settings', requireAdminAuth, asyncHandler(async (req: Request, res: Response) => {
     const b = req.body;
@@ -687,6 +750,61 @@ async function startServer() {
     if (Array.isArray(b.slides)) safeUpdates.slides = b.slides;
     if (b.chef && typeof b.chef === 'object') safeUpdates.chef = b.chef;
 
+    // Contenu de la page d'accueil : uniquement les champs connus, textes nettoyés.
+    if (b.home && typeof b.home === 'object') {
+      const h = b.home as Record<string, unknown>;
+      const home: HomeContent = {};
+      const textFields: [keyof HomeContent, number][] = [
+        ['aboutTitle', 80], ['aboutLabel', 80], ['aboutButton', 60], ['philosophyLabel', 80],
+        ['soupBandTitle', 80], ['soupBandText', 600], ['soupBandButton', 60],
+        ['menuTitle', 80], ['menuSubtitle', 300],
+        ['servicesTitle', 80], ['servicesIntro', 300],
+        ['contactTitle', 80], ['contactIntro', 400],
+      ];
+      for (const [key, max] of textFields) {
+        if (h[key] !== undefined) (home as Record<string, unknown>)[key] = sanitizeText(h[key], max);
+      }
+      for (const key of ['philosophyImage', 'soupBandImageLeft', 'soupBandImageCenter', 'soupBandImageRight'] as const) {
+        if (h[key] !== undefined) home[key] = sanitizeImage(h[key]);
+      }
+      if (Array.isArray(h.services)) {
+        const icons: ServiceIconName[] = ['leaf', 'chef', 'soup', 'bike', 'clock', 'heart', 'star', 'utensils', 'award', 'phone'];
+        home.services = (h.services as any[]).slice(0, 8).map((it): HomeServiceItem => ({
+          icon: icons.includes(it?.icon) ? it.icon : 'leaf',
+          title: sanitizeText(it?.title, 60),
+          text: sanitizeText(it?.text, 200),
+        })).filter((it) => it.title);
+      }
+      safeUpdates.home = home;
+    }
+
+    // Garnitures de la soupe : nom et prix obligatoires, prix entier positif.
+    if (Array.isArray(b.soupToppings)) {
+      const seen = new Set<string>();
+      const toppings: SoupTopping[] = [];
+      for (const it of (b.soupToppings as any[]).slice(0, 40)) {
+        const name = sanitizeText(it?.name, 120);
+        const price = Math.round(Number(it?.price));
+        if (!name || !Number.isFinite(price) || price < 0 || price > 1_000_000) continue;
+        let id = sanitizeText(it?.id, 60).replace(/[^a-zA-Z0-9_-]/g, '') || `top-${Date.now().toString(36)}-${toppings.length}`;
+        if (seen.has(id)) id = `${id}-${toppings.length}`;
+        seen.add(id);
+        toppings.push({
+          id,
+          name,
+          price,
+          icon: sanitizeText(it?.icon, 8) || undefined,
+          image: sanitizeImage(it?.image) || undefined,
+          description: sanitizeText(it?.description, 200) || undefined,
+          isAvailable: it?.isAvailable !== false,
+        });
+      }
+      if (toppings.length === 0) {
+        return res.status(400).json({ error: 'Gardez au moins une garniture (nom et prix obligatoires).' });
+      }
+      safeUpdates.soupToppings = toppings;
+    }
+
     const updated = await store.updateSettings(safeUpdates);
     res.json(updated);
   }));
@@ -733,9 +851,15 @@ async function startServer() {
     const safeSubject = sanitizeText(subject, 150);
     const safeMessage = sanitizeText(message, 3000);
 
+    // Robot détecté : on répond comme si tout allait bien, sans rien enregistrer ni notifier.
+    if (looksLikeSpam(req.body)) {
+      return res.status(201).json({ id: `MSG-${Date.now().toString().slice(-4)}`, name: safeName, status: 'new', createdAt: new Date().toISOString() });
+    }
     if (!safeName) return res.status(400).json({ error: 'Le nom complet est obligatoire' });
-    if (!safeEmail && !safePhone) return res.status(400).json({ error: 'Veuillez renseigner au moins un numéro de téléphone ou un email' });
+    const messageContactError = validateContactPair(safePhone, safeEmail);
+    if (messageContactError) return res.status(400).json({ error: messageContactError });
     if (!safeMessage) return res.status(400).json({ error: 'Le message est obligatoire' });
+    if (safeMessage.length < 5) return res.status(400).json({ error: 'Votre message est trop court.' });
 
     const newMsg = await store.createMessage({
       name: safeName,
@@ -780,8 +904,42 @@ async function startServer() {
     res.json({ success: true, message: 'Message supprimé' });
   }));
 
+  // ===================== 5. SEO : robots.txt, sitemap.xml, pages =====================
+  // Adresse publique du site : APP_URL si défini, sinon déduite de la requête.
+  const siteUrl = (req: Request) => {
+    const fromEnv = (process.env.APP_URL || '').trim().replace(/\/+$/, '');
+    if (/^https?:\/\//.test(fromEnv)) return fromEnv;
+    return `${isProduction ? 'https' : req.protocol}://${req.headers.host}`;
+  };
+
+  // Pages publiques réelles du site (toute autre adresse renvoie une page 404).
+  const PUBLIC_PAGES = ['/', '/confidentialite', '/conditions-generales', '/mentions-legales'];
+  const APP_ROUTES = [...PUBLIC_PAGES, '/admin-user'];
+
+  app.get('/robots.txt', (req: Request, res: Response) => {
+    res.type('text/plain').send(
+      `User-agent: *\nAllow: /\nDisallow: /admin-user\nDisallow: /api/\n\nSitemap: ${siteUrl(req)}/sitemap.xml\n`
+    );
+  });
+
+  app.get('/sitemap.xml', (req: Request, res: Response) => {
+    const base = siteUrl(req);
+    const today = new Date().toISOString().slice(0, 10);
+    const urls = PUBLIC_PAGES.map((p) => {
+      const priority = p === '/' ? '1.0' : '0.3';
+      const freq = p === '/' ? 'weekly' : 'yearly';
+      return `  <url>\n    <loc>${base}${p}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>${freq}</changefreq>\n    <priority>${priority}</priority>\n  </url>`;
+    }).join('\n');
+    res.type('application/xml').send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`);
+  });
+
+  // Une adresse d'API inconnue répond en JSON (et non avec la page du site).
+  app.use('/api', (_req: Request, res: Response) => {
+    res.status(404).json({ error: 'Ressource introuvable.' });
+  });
+
   // Vite middleware for development vs static build in production
-  if (process.env.NODE_ENV !== 'production') {
+  if (!isProduction) {
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',
@@ -789,9 +947,14 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
-    app.get('*', (_req: Request, res: Response) => {
-      res.sendFile(path.join(distPath, 'index.html'));
+    // index: false — la page HTML passe toujours par le gestionnaire ci-dessous
+    // (adresse du site injectée dans les balises de partage, statut 404 si besoin).
+    app.use(express.static(distPath, { index: false, maxAge: '7d' }));
+    const indexHtml = fs.readFileSync(path.join(distPath, 'index.html'), 'utf-8');
+    app.get('*', (req: Request, res: Response) => {
+      const isKnownPage = APP_ROUTES.includes(req.path.replace(/\/+$/, '') || '/');
+      const html = indexHtml.split('__SITE_URL__').join(siteUrl(req));
+      res.status(isKnownPage ? 200 : 404).type('html').set('Cache-Control', 'no-cache').send(html);
     });
   }
 

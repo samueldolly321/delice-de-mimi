@@ -7,6 +7,8 @@ import { useCustomerAuth } from '../context/CustomerAuthContext';
 import { CustomerInfo, DeliveryType, PaymentMethod, Order, OrderStatus } from '../types';
 import { api } from '../services/api';
 import { SocialIcon } from './SocialIcons';
+import { validateContactPair } from '../utils/validation';
+import { trackEvent } from '../utils/analytics';
 import { Bell, Send } from 'lucide-react';
 
 const ORDER_STATUS_STEPS: OrderStatus[] = [
@@ -80,6 +82,8 @@ export const CheckoutModal: React.FC = () => {
   const [mobileOperator, setMobileOperator] = useState<'mvola' | 'orange' | 'airtel'>('mvola');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [termsError, setTermsError] = useState(false);
 
   if (!isCheckoutOpen && !activeOrderConfirmation) return null;
 
@@ -102,12 +106,17 @@ export const CheckoutModal: React.FC = () => {
       setErrorMessage('Veuillez renseigner votre nom complet.');
       return;
     }
-    if (!customer.phone.trim() && !customer.email.trim()) {
-      setErrorMessage('Veuillez renseigner au moins un numéro de téléphone ou une adresse email.');
+    const contactError = validateContactPair(customer.phone, customer.email);
+    if (contactError) {
+      setErrorMessage(contactError);
       return;
     }
     if (deliveryType === 'delivery' && !customer.address.trim()) {
       setErrorMessage('Veuillez renseigner une adresse de livraison.');
+      return;
+    }
+    if (!acceptedTerms) {
+      setTermsError(true);
       return;
     }
 
@@ -136,6 +145,8 @@ export const CheckoutModal: React.FC = () => {
       };
 
       const createdOrder = await api.createOrder(orderData);
+      // Mesure d'audience (seulement si le visiteur l'a acceptée) : commande passée
+      trackEvent('purchase', { transaction_id: createdOrder.id, value: createdOrder.total, currency: 'MGA' });
       clearCart();
       setIsCheckoutOpen(false);
       setActiveOrderConfirmation(createdOrder);
@@ -695,6 +706,36 @@ export const CheckoutModal: React.FC = () => {
 
         {/* Submit Button — pied de page fixe, toujours visible */}
         <div className="p-5 sm:p-6 pt-4 bg-white border-t border-[#E6DECF]">
+          {/* Acceptation des conditions générales de vente (obligatoire) */}
+          <label className="flex items-start gap-2.5 mb-3 text-[12px] text-stone-600 leading-snug cursor-pointer">
+            <input
+              type="checkbox"
+              id="checkout-accept-terms"
+              checked={acceptedTerms}
+              onChange={(e) => {
+                setAcceptedTerms(e.target.checked);
+                if (e.target.checked) setTermsError(false);
+              }}
+              className="mt-0.5 w-4 h-4 accent-[#C62828] shrink-0 cursor-pointer"
+            />
+            <span>
+              J'accepte les{' '}
+              <a href="/conditions-generales" target="_blank" className="underline text-stone-800">
+                conditions générales de vente
+              </a>{' '}
+              et la{' '}
+              <a href="/confidentialite" target="_blank" className="underline text-stone-800">
+                politique de confidentialité
+              </a>
+              .
+            </span>
+          </label>
+          {termsError && (
+            <p className="mb-3 text-[12px] text-red-600 flex items-center gap-1.5">
+              <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+              Veuillez accepter les conditions générales pour valider votre commande.
+            </p>
+          )}
           <button
             type="submit"
             disabled={isSubmitting}

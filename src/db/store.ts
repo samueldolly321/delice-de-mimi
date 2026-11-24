@@ -218,6 +218,8 @@ const rowToSettings = (row: typeof schema.restaurantSettings.$inferSelect): Rest
   invoiceNotice: row.invoiceNotice || undefined,
   slides: (row.slidesJson as RestaurantSettings['slides']) || undefined,
   chef: (row.chefJson as RestaurantSettings['chef']) || undefined,
+  home: (row.homeJson as RestaurantSettings['home']) || undefined,
+  soupToppings: (row.toppingsJson as RestaurantSettings['soupToppings']) || undefined,
   notificationEmail: row.notificationEmail || undefined,
   notificationPhone: row.notificationPhone || undefined,
   notifyEmailEnabled: row.notifyEmailEnabled ?? true,
@@ -951,6 +953,8 @@ function toSettingsRow(s: Partial<RestaurantSettings>) {
   if (s.notifySoundEnabled !== undefined) row.notifySoundEnabled = s.notifySoundEnabled;
   if (s.slides !== undefined) row.slidesJson = s.slides;
   if (s.chef !== undefined) row.chefJson = s.chef;
+  if (s.home !== undefined) row.homeJson = s.home;
+  if (s.soupToppings !== undefined) row.toppingsJson = s.soupToppings;
   return row;
 }
 

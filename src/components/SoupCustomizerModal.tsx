@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { X, Plus, Minus, Check, ShoppingBag } from 'lucide-react';
 import { Product, SoupTopping } from '../types';
-import { SOUP_TOPPINGS } from '../data/seedData';
+import { resolveAvailableToppings } from '../data/homeContent';
 import { useCart } from '../context/CartContext';
 
 interface SoupCustomizerModalProps {
@@ -15,7 +15,9 @@ export const SoupCustomizerModal: React.FC<SoupCustomizerModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { addToCart, setIsCartOpen, formatPrice } = useCart();
+  const { addToCart, setIsCartOpen, formatPrice, settings } = useCart();
+  // Garnitures disponibles, telles que définies dans l'administration
+  const toppings = resolveAvailableToppings(settings);
 
   const [selectedToppings, setSelectedToppings] = useState<SoupTopping[]>([]);
   const [quantity, setQuantity] = useState<number>(1);
@@ -146,7 +148,7 @@ export const SoupCustomizerModal: React.FC<SoupCustomizerModalProps> = ({
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {SOUP_TOPPINGS.map((topping) => {
+              {toppings.map((topping) => {
                 const isChecked = selectedToppings.some((t) => t.id === topping.id);
 
                 return (

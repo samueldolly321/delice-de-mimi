@@ -24,6 +24,8 @@ interface CustomerAuthContextType {
     password: string;
     securityQuestion: string;
     securityAnswer: string;
+    website?: string;
+    formStartedAt?: number;
   }) => Promise<{ success: boolean; error?: string }>;
   updateProfile: (data: Partial<Customer>) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
@@ -100,6 +102,8 @@ export const CustomerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
     password: string;
     securityQuestion: string;
     securityAnswer: string;
+    website?: string;
+    formStartedAt?: number;
   }) => {
     const res = await api.registerCustomer(data);
     if (res.success && res.customer) {

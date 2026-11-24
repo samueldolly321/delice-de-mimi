@@ -17,6 +17,10 @@ import { AdminLogin } from './components/admin/AdminLogin';
 import { AdminPortal } from './components/admin/AdminPortal';
 import { AdminErrorToast } from './components/admin/AdminErrorToast';
 import { api } from './services/api';
+import { CookieBanner } from './components/CookieBanner';
+import { LegalPage, LegalPageKind } from './components/LegalPages';
+import { NotFoundPage } from './components/NotFoundPage';
+import { StickyOrderBar } from './components/StickyOrderBar';
 
 function MainLayout() {
   const [isAdminOpen, setIsAdminOpen] = useState(false);
@@ -33,16 +37,22 @@ function MainLayout() {
   useEffect(() => {
     if (!settings?.name) return;
 
-    document.title = `${settings.name} — Restaurant Asiatique à Antananarivo | Livraison & Commande en ligne`;
+    // Le titre des pages légales / 404 est géré par ces pages elles-mêmes.
+    if (window.location.pathname === '/' || window.location.pathname === '/admin-user') {
+      document.title = `${settings.name} | Restaurant asiatique à Antananarivo`;
+    }
 
     const metaDesc = document.querySelector<HTMLMetaElement>('meta[name="description"]');
-    if (metaDesc) metaDesc.content = settings.description || `${settings.name} : restaurant asiatique à Antananarivo. Commande en ligne et livraison rapide.`;
+    // Google n'affiche qu'environ 155 caractères : on coupe proprement sur un mot.
+    const shorten = (text: string, max = 155) =>
+      text.length <= max ? text : text.slice(0, text.lastIndexOf(' ', max - 1)).replace(/[\s,;:.]+$/, '') + '…';
+    if (metaDesc && settings.description) metaDesc.content = shorten(settings.description);
 
     const ogTitle = document.querySelector<HTMLMetaElement>('meta[property="og:title"]');
-    if (ogTitle) ogTitle.content = `${settings.name} — Restaurant Asiatique à Antananarivo`;
+    if (ogTitle) ogTitle.content = `${settings.name} | Restaurant asiatique à Antananarivo`;
 
     const ogDesc = document.querySelector<HTMLMetaElement>('meta[property="og:description"]');
-    if (ogDesc) ogDesc.content = settings.description || '';
+    if (ogDesc && settings.description) ogDesc.content = shorten(settings.description, 200);
 
     let canonical = document.querySelector<HTMLLinkElement>('link#canonical-link');
     if (canonical) canonical.href = window.location.origin + '/';
@@ -117,6 +127,14 @@ function MainLayout() {
 
     return () => { cancelled = true; };
   }, [settings?.logoUrl]);
+
+  // Arrivée avec une ancre (ex. /#menu depuis la page 404) : on y descend une fois la page affichée.
+  useEffect(() => {
+    const id = window.location.hash.slice(1);
+    if (!id) return;
+    const t = window.setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }), 400);
+    return () => window.clearTimeout(t);
+  }, []);
 
   // Détecte l'accès admin via l'URL /admin-user (aucun bouton visible dans l'interface)
   useEffect(() => {
@@ -203,6 +221,9 @@ function MainLayout() {
       {/* Floating To Top Button */}
       <ScrollToTop />
 
+      {/* Barre « Commander » toujours visible sur mobile */}
+      <StickyOrderBar />
+
       {/* Cart Drawer */}
       <CartDrawer />
 
@@ -234,11 +255,23 @@ function MainLayout() {
   );
 }
 
+const LEGAL_PAGES: LegalPageKind[] = ['confidentialite', 'conditions-generales', 'mentions-legales'];
+
+/** Choisit la page à afficher selon l'adresse (le serveur renvoie 404 pour les adresses inconnues). */
+function PageRouter() {
+  const path = window.location.pathname.replace(/\/+$/, '') || '/';
+  if (path === '/' || path === '/admin-user') return <MainLayout />;
+  const legal = LEGAL_PAGES.find((p) => path === `/${p}`);
+  if (legal) return <LegalPage kind={legal} />;
+  return <NotFoundPage />;
+}
+
 export default function App() {
   return (
     <CustomerAuthProvider>
       <CartProvider>
-        <MainLayout />
+        <PageRouter />
+        <CookieBanner />
         <AdminErrorToast />
       </CartProvider>
     </CustomerAuthProvider>

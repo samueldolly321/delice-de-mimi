@@ -342,7 +342,9 @@ export const api = {
   // Settings
   async getSettings(): Promise<RestaurantSettings> {
     try {
-      const res = await fetch('/api/settings');
+      // Avec la session admin, le serveur renvoie aussi les réglages internes
+      // (notifications) ; sans elle, seulement les informations publiques.
+      const res = await fetch('/api/settings', { headers: getAdminHeaders() });
       if (res.ok) {
         const data = await res.json();
         localStorage.setItem(SETTINGS_KEY, JSON.stringify(data));
@@ -517,7 +519,7 @@ export const api = {
     }
   },
 
-  async registerCustomer(data: { fullName: string; phone?: string; email?: string; address?: string; district?: string; password: string; securityQuestion: string; securityAnswer: string }): Promise<{ success: boolean; customer?: Customer; orders?: Order[]; error?: string }> {
+  async registerCustomer(data: { fullName: string; phone?: string; email?: string; address?: string; district?: string; password: string; securityQuestion: string; securityAnswer: string; website?: string; formStartedAt?: number }): Promise<{ success: boolean; customer?: Customer; orders?: Order[]; error?: string }> {
     try {
       const res = await fetch('/api/customer/register', {
         method: 'POST',

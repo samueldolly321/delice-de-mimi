@@ -25,8 +25,13 @@ import {
   AlertTriangle,
   Lock,
   Gift,
+  LayoutTemplate,
+  Soup,
 } from 'lucide-react';
 import { RestaurantSettings, HeroSlide, ChefInfo } from '../../types';
+import { HomeContentEditor } from './HomeContentEditor';
+import { ToppingsEditor } from './ToppingsEditor';
+import { resolveAllToppings } from '../../data/homeContent';
 import { api } from '../../services/api';
 import { SocialIcon } from '../SocialIcons';
 import { ImageUploadInput } from '../common/ImageUploadInput';
@@ -38,10 +43,10 @@ interface SettingsManagerProps {
   onRefresh: () => void;
 }
 
-type SettingsSection = 'identity' | 'notifications' | 'slides' | 'chef' | 'contact' | 'delivery' | 'loyalty' | 'social' | 'invoice' | 'security' | 'danger';
+type SettingsSection = 'identity' | 'notifications' | 'slides' | 'home' | 'toppings' | 'chef' | 'contact' | 'delivery' | 'loyalty' | 'social' | 'invoice' | 'security' | 'danger';
 
 export const SettingsManager: React.FC<SettingsManagerProps> = ({ settings, onRefresh }) => {
-  const { refreshSettings } = useCart();
+  const { refreshSettings, formatPrice } = useCart();
   const [activeSection, setActiveSection] = useState<SettingsSection>('identity');
 
   const [formData, setFormData] = useState<RestaurantSettings>({
@@ -64,6 +69,8 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({ settings, onRe
     freeDeliveryNotice: settings.freeDeliveryNotice || 'Livraison offerte dès 50 000 Ar',
     slides: settings.slides && settings.slides.length > 0 ? settings.slides : DEFAULT_HERO_SLIDES,
     chef: settings.chef || DEFAULT_CHEF_INFO,
+    home: settings.home || {},
+    soupToppings: resolveAllToppings(settings),
   });
 
   const [isSaving, setIsSaving] = useState(false);
@@ -254,6 +261,8 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({ settings, onRe
     { id: 'identity', label: 'Identité & Logo', icon: Store },
     { id: 'notifications', label: 'Notifications Commandes (Email & Tél)', shortLabel: 'Notifications', icon: Bell },
     { id: 'slides', label: 'Diaporama Accueil (Slides)', shortLabel: 'Diaporama', icon: Layers },
+    { id: 'home', label: "Page d'accueil (textes & photos)", shortLabel: "Page d'accueil", icon: LayoutTemplate },
+    { id: 'toppings', label: 'Garnitures de la soupe', shortLabel: 'Garnitures', icon: Soup },
     { id: 'chef', label: 'Le Chef & Histoire', shortLabel: 'Le Chef', icon: ChefHat },
     { id: 'contact', label: 'Coordonnées & Horaires', shortLabel: 'Coordonnées', icon: Phone },
     { id: 'delivery', label: 'Tarifs & Livraison', shortLabel: 'Livraison', icon: DollarSign },
@@ -856,6 +865,35 @@ SMTP_FROM="Saveurs d'Asie <contact@saveursdasie.mg>"`}
                 />
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  {/* Petit titre au-dessus du grand titre */}
+                  <div>
+                    <label className="font-semibold text-stone-700 block mb-1">
+                      Petit titre (au-dessus du titre)
+                    </label>
+                    <input
+                      type="text"
+                      value={slide.tag || ''}
+                      onChange={(e) => updateSlide(index, { tag: e.target.value })}
+                      placeholder="Ex: Soupes & bouillons mijotés (vide = aucun)"
+                      className="w-full p-2.5 rounded-xl border border-stone-200 focus:outline-none focus:border-[#C62828] bg-white text-sm"
+                    />
+                  </div>
+
+                  {/* Description de la photo (accessibilité + Google) */}
+                  <div>
+                    <label className="font-semibold text-stone-700 block mb-1">
+                      Description de la photo
+                    </label>
+                    <input
+                      type="text"
+                      value={slide.imageAlt || ''}
+                      onChange={(e) => updateSlide(index, { imageAlt: e.target.value })}
+                      placeholder="Ex: Bol de soupe aux crevettes et œufs marinés"
+                      className="w-full p-2.5 rounded-xl border border-stone-200 focus:outline-none focus:border-[#C62828] bg-white text-sm"
+                    />
+                    <p className="text-[11px] text-stone-400 mt-1">Lue par Google et les personnes malvoyantes.</p>
+                  </div>
+
                   {/* Titre du slide */}
                   <div className="sm:col-span-2">
                     <label className="font-semibold text-stone-700 block mb-1">
@@ -920,6 +958,24 @@ SMTP_FROM="Saveurs d'Asie <contact@saveursdasie.mg>"`}
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* PAGE D'ACCUEIL : textes et photos des sections */}
+      {activeSection === 'home' && (
+        <div className="bg-white p-5 sm:p-6 rounded-2xl border border-stone-200 shadow-2xs animate-in fade-in-50 duration-150">
+          <HomeContentEditor value={formData.home || {}} onChange={(home) => setFormData({ ...formData, home })} />
+        </div>
+      )}
+
+      {/* GARNITURES DE LA SOUPE */}
+      {activeSection === 'toppings' && (
+        <div className="bg-white p-5 sm:p-6 rounded-2xl border border-stone-200 shadow-2xs animate-in fade-in-50 duration-150">
+          <ToppingsEditor
+            value={formData.soupToppings || []}
+            onChange={(soupToppings) => setFormData({ ...formData, soupToppings })}
+            formatPrice={formatPrice}
+          />
         </div>
       )}
 

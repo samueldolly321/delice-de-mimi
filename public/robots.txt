@@ -1,5 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /admin-user
-
-Sitemap: https://VOTRE-DOMAINE.mg/sitemap.xml

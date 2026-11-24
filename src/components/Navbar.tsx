@@ -101,7 +101,7 @@ export const Navbar: React.FC = () => {
             id="nav-logo"
           >
             {settings.logoUrl ? (
-              <img src={settings.logoUrl} alt="" className="w-9 h-9 rounded-full object-cover bg-white shrink-0" referrerPolicy="no-referrer" />
+              <img src={settings.logoUrl} alt={`Logo ${settings.name}`} className="w-9 h-9 rounded-full object-cover bg-white shrink-0" referrerPolicy="no-referrer" />
             ) : (
               <span className={`w-9 h-9 rounded-full flex items-center justify-center font-bold shrink-0 ${solid ? 'bg-ink text-white' : 'bg-white text-ink'}`}>
                 {settings.logoText || '味'}
@@ -151,6 +151,15 @@ export const Navbar: React.FC = () => {
               <span className="absolute -top-1.5 -right-2 min-w-[18px] h-[18px] px-1 rounded-full bg-accent text-white text-[10px] font-bold flex items-center justify-center">
                 {itemCount}
               </span>
+            </button>
+
+            {/* Appel à l'action principal */}
+            <button
+              onClick={() => (itemCount > 0 ? setIsCartOpen(true) : scrollToSection('menu'))}
+              id="cta-commander-btn"
+              className="hidden lg:inline-flex items-center bg-accent hover:bg-[#8E1B1B] text-white label-caps text-[11px] px-5 py-2.5 rounded-[3px] transition-colors cursor-pointer"
+            >
+              {itemCount > 0 ? 'Valider ma commande' : 'Commander'}
             </button>
 
             <button
