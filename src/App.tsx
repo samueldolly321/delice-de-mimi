@@ -178,19 +178,19 @@ function MainLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-[#1F1F1F] flex flex-col font-sans selection:bg-[#C62828] selection:text-white relative">
+    <div className="min-h-screen bg-white text-[#1F1F1F] flex flex-col font-sans selection:bg-[#1C2B4A] selection:text-white relative">
       {/* Navigation */}
       <Navbar />
 
       {/* Hero Section */}
       <main className="flex-1">
         <Hero onOpenCustomizer={handleOpenSoupCustomizer} isAdmin={isAdminLoggedIn} />
-        <ChefSection />
         <MenuSection
           isCustomizerOpen={isSoupCustomizerOpen}
           onOpenCustomizer={() => setIsSoupCustomizerOpen(true)}
           onCloseCustomizer={() => setIsSoupCustomizerOpen(false)}
         />
+        <ChefSection />
         <ContactSection />
       </main>
 

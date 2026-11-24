@@ -1,14 +1,56 @@
 @import "tailwindcss";
 
+/*
+ * Identité visuelle : sobre et élégante, inspirée des pâtisseries fines.
+ * - Encre marine pour la navigation et les boutons
+ * - Doré discret pour les prix et les accents
+ * - Fines bordures beiges qui dessinent une grille
+ * - Titres en serif (Libre Baskerville), textes et libellés en sans géométrique (Jost)
+ */
 @theme {
-  --font-display: 'Cinzel', serif, Georgia;
-  --font-sans: 'Plus Jakarta Sans', sans-serif, system-ui;
-  --color-asian-red: #C62828;
-  --color-asian-darkred: #8E1B1B;
-  --color-asian-gold: #F4C542;
-  --color-asian-lightgold: #FFE082;
+  --font-display: 'Libre Baskerville', Georgia, serif;
+  --font-serif: 'Libre Baskerville', Georgia, serif;
+  --font-sans: 'Jost', system-ui, sans-serif;
+
+  --color-ink: #1C2B4A;
+  --color-ink-dark: #0F1A30;
+  --color-gold: #B8975A;
+  --color-gold-light: #E9D9B4;
+  --color-hairline: #E6DECF;
+  --color-cocoa: #5B4A42;
+
+  /* Anciens noms conservés pour compatibilité */
+  --color-asian-red: #1C2B4A;
+  --color-asian-darkred: #0F1A30;
+  --color-asian-gold: #B8975A;
+  --color-asian-lightgold: #E9D9B4;
   --color-asian-cream: #FFFFFF;
   --color-asian-charcoal: #1F1F1F;
+}
+
+/* Libellé en petites capitales espacées (navigation, sur-titres, boutons) */
+.label-caps {
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-weight: 500;
+}
+
+/* Bouton contour fin, façon « READ BIO » */
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.9rem;
+  border: 1px solid currentColor;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  transition: background-color 0.25s, color 0.25s, border-color 0.25s;
+  cursor: pointer;
 }
 
 /* Steam keyframe animation for hot soup/dishes */
@@ -39,13 +81,13 @@
   animation: steam 3.2s cubic-bezier(0.4, 0, 0.2, 1) 2s infinite;
 }
 
-/* Subtle Chinese Lattice Pattern */
-.bg-lattice {
-  background-color: #FFFFFF;
-  background-image: radial-gradient(#F4C542 0.75px, transparent 0.75px), radial-gradient(#C62828 0.75px, #FFFFFF 0.75px);
-  background-size: 30px 30px;
-  background-position: 0 0, 15px 15px;
-  background-opacity: 0.05;
+/* Petite flèche du bas qui « respire » sous le titre d'accueil */
+@keyframes nudge {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+}
+.animate-nudge {
+  animation: nudge 2.4s ease-in-out infinite;
 }
 
 /* Custom smooth scrollbar */
@@ -57,9 +99,9 @@
   background: #FFFFFF;
 }
 ::-webkit-scrollbar-thumb {
-  background: #E0CEB5;
+  background: #E6DECF;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #C62828;
+  background: #B8975A;
 }

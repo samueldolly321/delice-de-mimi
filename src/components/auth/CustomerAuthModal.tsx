@@ -226,9 +226,9 @@ export const CustomerAuthModal: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200">
-      <div className="bg-[#FFF9F0] w-full max-w-lg rounded-3xl shadow-2xl border border-[#EBDCC5] overflow-hidden flex flex-col max-h-[92vh]">
+      <div className="bg-[#FFFFFF] w-full max-w-lg rounded-3xl shadow-2xl border border-[#E6DECF] overflow-hidden flex flex-col max-h-[92vh]">
         {/* Header decoration */}
-        <div className="bg-gradient-to-r from-[#C62828] to-[#8E1B1B] text-white p-6 relative">
+        <div className="bg-gradient-to-r from-[#1C2B4A] to-[#0F1A30] text-white p-6 relative">
           <button
             onClick={handleClose}
             className="absolute top-4 right-4 p-2 text-white/80 hover:text-white rounded-full hover:bg-white/10 transition-colors"
@@ -239,10 +239,10 @@ export const CustomerAuthModal: React.FC = () => {
 
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center backdrop-blur-xs">
-              <User className="w-6 h-6 text-[#F4C542]" />
+              <User className="w-6 h-6 text-[#B8975A]" />
             </div>
             <div>
-              <div className="text-[11px] font-bold uppercase tracking-widest text-[#FFE082] flex items-center gap-1.5">
+              <div className="text-[11px] font-bold uppercase tracking-widest text-[#E9D9B4] flex items-center gap-1.5">
                 <span>Espace Client Gourmand</span>
               </div>
               <h3 className="font-serif text-xl font-bold text-white">
@@ -253,7 +253,7 @@ export const CustomerAuthModal: React.FC = () => {
 
           <p className="mt-2 text-xs text-white/85 leading-relaxed">
             Pour commander vos spécialités, connectez-vous avec{' '}
-            <strong className="text-[#FFE082]">votre numéro de téléphone ou email, et votre mot de passe</strong>.
+            <strong className="text-[#E9D9B4]">votre numéro de téléphone ou email, et votre mot de passe</strong>.
           </p>
         </div>
 
@@ -267,7 +267,7 @@ export const CustomerAuthModal: React.FC = () => {
 
         {/* Mode Switcher Tabs */}
         {!forgotMode && (
-        <div className="flex border-b border-[#EBDCC5] bg-stone-100/50 p-1.5 m-4 rounded-2xl">
+        <div className="flex border-b border-[#E6DECF] bg-stone-100/50 p-1.5 m-4 rounded-2xl">
           <button
             type="button"
             onClick={() => {
@@ -276,7 +276,7 @@ export const CustomerAuthModal: React.FC = () => {
             }}
             className={`flex-1 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
               authModalMode === 'login'
-                ? 'bg-white text-[#C62828] shadow-xs'
+                ? 'bg-white text-[#1C2B4A] shadow-xs'
                 : 'text-stone-600 hover:text-stone-900'
             }`}
           >
@@ -291,7 +291,7 @@ export const CustomerAuthModal: React.FC = () => {
             }}
             className={`flex-1 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
               authModalMode === 'register'
-                ? 'bg-white text-[#C62828] shadow-xs'
+                ? 'bg-white text-[#1C2B4A] shadow-xs'
                 : 'text-stone-600 hover:text-stone-900'
             }`}
           >
@@ -317,7 +317,7 @@ export const CustomerAuthModal: React.FC = () => {
               {forgotStep === 'identifier' && (
                 <form onSubmit={handleForgotIdentifierSubmit} className="space-y-4">
                   <div className="flex items-center gap-1.5 text-sm font-bold text-stone-800">
-                    <HelpCircle className="w-4 h-4 text-[#C62828]" />
+                    <HelpCircle className="w-4 h-4 text-[#1C2B4A]" />
                     <span>Mot de passe oublié</span>
                   </div>
                   <p className="text-xs text-stone-600">
@@ -333,7 +333,7 @@ export const CustomerAuthModal: React.FC = () => {
                       value={forgotIdentifier}
                       onChange={(e) => setForgotIdentifier(e.target.value)}
                       placeholder="034... ou votre@email.com"
-                      className="w-full px-3.5 py-3 bg-white rounded-xl border border-[#EBDCC5] text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#C62828]/20 focus:border-[#C62828] shadow-2xs"
+                      className="w-full px-3.5 py-3 bg-white rounded-xl border border-[#E6DECF] text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#1C2B4A]/20 focus:border-[#1C2B4A] shadow-2xs"
                     />
                   </div>
                   {forgotError && (
@@ -345,7 +345,7 @@ export const CustomerAuthModal: React.FC = () => {
                   <button
                     type="submit"
                     disabled={forgotLoading}
-                    className="w-full bg-[#C62828] hover:bg-[#8E1B1B] text-white py-3 px-4 rounded-xl font-bold text-xs shadow-md shadow-[#C62828]/25 transition-all transform active:scale-95 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    className="w-full bg-[#1C2B4A] hover:bg-[#0F1A30] text-white py-3 px-4 rounded-xl font-bold text-xs shadow-md shadow-[#1C2B4A]/25 transition-all transform active:scale-95 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                   >
                     {forgotLoading ? 'Recherche...' : 'Continuer'}
                   </button>
@@ -369,7 +369,7 @@ export const CustomerAuthModal: React.FC = () => {
                       required
                       value={forgotAnswer}
                       onChange={(e) => setForgotAnswer(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-white rounded-xl border border-[#EBDCC5] text-sm text-stone-900 focus:outline-none focus:border-[#C62828] shadow-2xs"
+                      className="w-full px-3.5 py-2.5 bg-white rounded-xl border border-[#E6DECF] text-sm text-stone-900 focus:outline-none focus:border-[#1C2B4A] shadow-2xs"
                     />
                   </div>
                   <div>
@@ -384,7 +384,7 @@ export const CustomerAuthModal: React.FC = () => {
                         placeholder="Au moins 6 caractères"
                         value={forgotNewPassword}
                         onChange={(e) => setForgotNewPassword(e.target.value)}
-                        className="w-full px-3.5 py-2.5 pr-10 bg-white rounded-xl border border-[#EBDCC5] text-sm text-stone-900 focus:outline-none focus:border-[#C62828] shadow-2xs"
+                        className="w-full px-3.5 py-2.5 pr-10 bg-white rounded-xl border border-[#E6DECF] text-sm text-stone-900 focus:outline-none focus:border-[#1C2B4A] shadow-2xs"
                       />
                       <button
                         type="button"
@@ -406,7 +406,7 @@ export const CustomerAuthModal: React.FC = () => {
                       minLength={6}
                       value={forgotConfirmPassword}
                       onChange={(e) => setForgotConfirmPassword(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-white rounded-xl border border-[#EBDCC5] text-sm text-stone-900 focus:outline-none focus:border-[#C62828] shadow-2xs"
+                      className="w-full px-3.5 py-2.5 bg-white rounded-xl border border-[#E6DECF] text-sm text-stone-900 focus:outline-none focus:border-[#1C2B4A] shadow-2xs"
                     />
                   </div>
                   {forgotError && (
@@ -418,7 +418,7 @@ export const CustomerAuthModal: React.FC = () => {
                   <button
                     type="submit"
                     disabled={forgotLoading}
-                    className="w-full bg-[#C62828] hover:bg-[#8E1B1B] text-white py-3 px-4 rounded-xl font-bold text-xs shadow-md shadow-[#C62828]/25 transition-all transform active:scale-95 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    className="w-full bg-[#1C2B4A] hover:bg-[#0F1A30] text-white py-3 px-4 rounded-xl font-bold text-xs shadow-md shadow-[#1C2B4A]/25 transition-all transform active:scale-95 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                   >
                     {forgotLoading ? 'Vérification...' : 'Réinitialiser mon mot de passe'}
                   </button>
@@ -465,7 +465,7 @@ export const CustomerAuthModal: React.FC = () => {
                     placeholder="Ex: +261 34 12 345 67 ou aina@gmail.com"
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 bg-white rounded-xl border border-[#EBDCC5] text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#C62828]/20 focus:border-[#C62828] shadow-2xs"
+                    className="w-full pl-10 pr-4 py-3 bg-white rounded-xl border border-[#E6DECF] text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#1C2B4A]/20 focus:border-[#1C2B4A] shadow-2xs"
                   />
                 </div>
                 <p className="mt-1 text-[11px] text-stone-500">
@@ -485,7 +485,7 @@ export const CustomerAuthModal: React.FC = () => {
                       setForgotMode(true);
                       setLoginError(null);
                     }}
-                    className="text-[11px] font-semibold text-[#C62828] hover:underline"
+                    className="text-[11px] font-semibold text-[#1C2B4A] hover:underline"
                   >
                     Mot de passe oublié ?
                   </button>
@@ -501,7 +501,7 @@ export const CustomerAuthModal: React.FC = () => {
                     placeholder="••••••••"
                     value={loginPassword}
                     onChange={(e) => setLoginPassword(e.target.value)}
-                    className="w-full pl-10 pr-10 py-3 bg-white rounded-xl border border-[#EBDCC5] text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#C62828]/20 focus:border-[#C62828] shadow-2xs"
+                    className="w-full pl-10 pr-10 py-3 bg-white rounded-xl border border-[#E6DECF] text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#1C2B4A]/20 focus:border-[#1C2B4A] shadow-2xs"
                   />
                   <button
                     type="button"
@@ -524,7 +524,7 @@ export const CustomerAuthModal: React.FC = () => {
                   <button
                     type="button"
                     onClick={switchToRegisterWithIdentifier}
-                    className="text-left font-semibold text-[#C62828] hover:underline flex items-center gap-1 text-[11px] mt-0.5"
+                    className="text-left font-semibold text-[#1C2B4A] hover:underline flex items-center gap-1 text-[11px] mt-0.5"
                   >
                     <span>Créer un profil avec « {identifier} » dès maintenant</span>
                     <ArrowRight className="w-3 h-3" />
@@ -535,7 +535,7 @@ export const CustomerAuthModal: React.FC = () => {
               <button
                 type="submit"
                 disabled={loginLoading}
-                className="w-full bg-[#C62828] hover:bg-[#8E1B1B] text-white py-3.5 px-4 rounded-xl font-bold text-sm shadow-md shadow-[#C62828]/25 transition-all transform active:scale-95 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                className="w-full bg-[#1C2B4A] hover:bg-[#0F1A30] text-white py-3.5 px-4 rounded-xl font-bold text-sm shadow-md shadow-[#1C2B4A]/25 transition-all transform active:scale-95 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
               >
                 {loginLoading ? (
                   <span>Vérification...</span>
@@ -561,7 +561,7 @@ export const CustomerAuthModal: React.FC = () => {
                   placeholder="Ex: Fanja Andrianarisoa"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-white rounded-xl border border-[#EBDCC5] text-xs text-stone-900 focus:outline-none focus:border-[#C62828] shadow-2xs"
+                  className="w-full px-3.5 py-2.5 bg-white rounded-xl border border-[#E6DECF] text-xs text-stone-900 focus:outline-none focus:border-[#1C2B4A] shadow-2xs"
                 />
               </div>
 
@@ -578,7 +578,7 @@ export const CustomerAuthModal: React.FC = () => {
                         name="regType"
                         checked={regType === 'phone'}
                         onChange={() => setRegType('phone')}
-                        className="text-[#C62828] focus:ring-[#C62828]"
+                        className="text-[#1C2B4A] focus:ring-[#1C2B4A]"
                       />
                       <span>Numéro de téléphone</span>
                     </label>
@@ -588,7 +588,7 @@ export const CustomerAuthModal: React.FC = () => {
                         name="regType"
                         checked={regType === 'email'}
                         onChange={() => setRegType('email')}
-                        className="text-[#C62828] focus:ring-[#C62828]"
+                        className="text-[#1C2B4A] focus:ring-[#1C2B4A]"
                       />
                       <span>Adresse email</span>
                     </label>
@@ -605,7 +605,7 @@ export const CustomerAuthModal: React.FC = () => {
                     placeholder={regType === 'phone' ? 'Ex: 034 12 345 67 ou +261 32 00 000 00' : 'Ex: monadresse@gmail.com'}
                     value={regIdentifier}
                     onChange={(e) => setRegIdentifier(e.target.value)}
-                    className="w-full pl-9 pr-3.5 py-2.5 bg-white rounded-xl border border-[#EBDCC5] text-xs text-stone-900 focus:outline-none focus:border-[#C62828] shadow-2xs"
+                    className="w-full pl-9 pr-3.5 py-2.5 bg-white rounded-xl border border-[#E6DECF] text-xs text-stone-900 focus:outline-none focus:border-[#1C2B4A] shadow-2xs"
                   />
                 </div>
               </div>
@@ -623,7 +623,7 @@ export const CustomerAuthModal: React.FC = () => {
                     placeholder="Au moins 6 caractères"
                     value={regPassword}
                     onChange={(e) => setRegPassword(e.target.value)}
-                    className="w-full px-3.5 py-2.5 pr-10 bg-white rounded-xl border border-[#EBDCC5] text-xs text-stone-900 focus:outline-none focus:border-[#C62828] shadow-2xs"
+                    className="w-full px-3.5 py-2.5 pr-10 bg-white rounded-xl border border-[#E6DECF] text-xs text-stone-900 focus:outline-none focus:border-[#1C2B4A] shadow-2xs"
                   />
                   <button
                     type="button"
@@ -650,7 +650,7 @@ export const CustomerAuthModal: React.FC = () => {
                   <select
                     value={regSecurityQuestion}
                     onChange={(e) => setRegSecurityQuestion(e.target.value)}
-                    className="w-full px-3 py-2 bg-white rounded-xl border border-[#EBDCC5] text-xs text-stone-900 focus:outline-none focus:border-[#C62828]"
+                    className="w-full px-3 py-2 bg-white rounded-xl border border-[#E6DECF] text-xs text-stone-900 focus:outline-none focus:border-[#1C2B4A]"
                   >
                     {SECURITY_QUESTIONS.map((q) => (
                       <option key={q} value={q}>{q}</option>
@@ -663,7 +663,7 @@ export const CustomerAuthModal: React.FC = () => {
                       placeholder="Votre propre question"
                       value={regSecurityQuestionOther}
                       onChange={(e) => setRegSecurityQuestionOther(e.target.value)}
-                      className="w-full mt-2 px-3.5 py-2 bg-white rounded-xl border border-[#EBDCC5] text-xs text-stone-900 focus:outline-none focus:border-[#C62828]"
+                      className="w-full mt-2 px-3.5 py-2 bg-white rounded-xl border border-[#E6DECF] text-xs text-stone-900 focus:outline-none focus:border-[#1C2B4A]"
                     />
                   )}
                 </div>
@@ -677,7 +677,7 @@ export const CustomerAuthModal: React.FC = () => {
                     placeholder="Réponse (pas sensible à la casse)"
                     value={regSecurityAnswer}
                     onChange={(e) => setRegSecurityAnswer(e.target.value)}
-                    className="w-full px-3.5 py-2 bg-white rounded-xl border border-[#EBDCC5] text-xs text-stone-900 focus:outline-none focus:border-[#C62828]"
+                    className="w-full px-3.5 py-2 bg-white rounded-xl border border-[#E6DECF] text-xs text-stone-900 focus:outline-none focus:border-[#1C2B4A]"
                   />
                 </div>
               </div>
@@ -696,7 +696,7 @@ export const CustomerAuthModal: React.FC = () => {
                     placeholder="Ex: Villa 12, Lot II M 45"
                     value={regAddress}
                     onChange={(e) => setRegAddress(e.target.value)}
-                    className="w-full pl-9 pr-3.5 py-2.5 bg-white rounded-xl border border-[#EBDCC5] text-xs text-stone-900 focus:outline-none focus:border-[#C62828] shadow-2xs"
+                    className="w-full pl-9 pr-3.5 py-2.5 bg-white rounded-xl border border-[#E6DECF] text-xs text-stone-900 focus:outline-none focus:border-[#1C2B4A] shadow-2xs"
                   />
                 </div>
               </div>
@@ -709,7 +709,7 @@ export const CustomerAuthModal: React.FC = () => {
                 <select
                   value={regDistrict}
                   onChange={(e) => setRegDistrict(e.target.value)}
-                  className="w-full px-3 py-2 bg-white rounded-xl border border-[#EBDCC5] text-xs text-stone-900 focus:outline-none focus:border-[#C62828]"
+                  className="w-full px-3 py-2 bg-white rounded-xl border border-[#E6DECF] text-xs text-stone-900 focus:outline-none focus:border-[#1C2B4A]"
                 >
                   <option value="Antanimena">Antanimena (Proche Restaurant)</option>
                   <option value="Ankorondrano">Ankorondrano</option>
@@ -726,7 +726,7 @@ export const CustomerAuthModal: React.FC = () => {
                     placeholder="Précisez votre quartier / zone"
                     value={regDistrictOther}
                     onChange={(e) => setRegDistrictOther(e.target.value)}
-                    className="w-full mt-2 px-3.5 py-2 bg-white rounded-xl border border-[#EBDCC5] text-xs text-stone-900 focus:outline-none focus:border-[#C62828]"
+                    className="w-full mt-2 px-3.5 py-2 bg-white rounded-xl border border-[#E6DECF] text-xs text-stone-900 focus:outline-none focus:border-[#1C2B4A]"
                   />
                 )}
               </div>
@@ -742,7 +742,7 @@ export const CustomerAuthModal: React.FC = () => {
                 <button
                   type="submit"
                   disabled={regLoading}
-                  className="w-full bg-[#C62828] hover:bg-[#8E1B1B] text-white py-3 px-4 rounded-xl font-bold text-xs sm:text-sm shadow-md shadow-[#C62828]/25 transition-all transform active:scale-95 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                  className="w-full bg-[#1C2B4A] hover:bg-[#0F1A30] text-white py-3 px-4 rounded-xl font-bold text-xs sm:text-sm shadow-md shadow-[#1C2B4A]/25 transition-all transform active:scale-95 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                 >
                   {regLoading ? (
                     <span>Création du profil en cours...</span>

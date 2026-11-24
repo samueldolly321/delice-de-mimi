@@ -1,12 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  ArrowRight,
-  Clock,
-  Leaf,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
-  Utensils,
-  Edit3,
   X,
   Check,
   Save,
@@ -223,172 +219,127 @@ export const Hero: React.FC<HeroProps> = ({ onOpenCustomizer, isAdmin }) => {
   return (
     <section
       id="accueil"
-      className="relative w-full overflow-hidden bg-black select-none"
+      className="relative w-full overflow-hidden bg-[#141414] select-none scroll-mt-32"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      {/* ========================================================================= */}
-      {/* FULL-WIDTH SLIDESHOW (3 SLIDES PLEINE LARGEUR)                            */}
-      {/* ========================================================================= */}
-      <div className="relative w-full min-h-[580px] sm:min-h-[640px] lg:min-h-screen h-[82vh] max-h-[820px] lg:max-h-none overflow-hidden">
+      {/* Grande photo pleine largeur avec titre centré en serif italique */}
+      <div className="relative w-full h-[78vh] min-h-[520px] max-h-[860px] overflow-hidden">
         {slides.map((slide, index) => {
           const isActive = index === currentIndex;
 
           return (
             <div
               key={`hero-slide-${index}`}
-              className={`absolute inset-0 w-full h-full transition-opacity duration-700 ease-in-out ${
+              className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out ${
                 isActive ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'
               }`}
               aria-hidden={!isActive}
             >
-              {/* Full-width Background Image */}
               <img
                 src={slide.image}
                 alt={slide.imageAlt || slide.title}
-                className={`absolute inset-0 z-0 w-full h-full object-cover object-center transition-transform duration-7000 ease-out ${
+                className={`absolute inset-0 w-full h-full object-cover object-center transition-transform duration-[7000ms] ease-out ${
                   isActive ? 'scale-105' : 'scale-100'
                 }`}
                 loading={index === 0 ? 'eager' : 'lazy'}
                 referrerPolicy="no-referrer"
               />
 
-              {/* High-Contrast Directional Overlays for Pristine Legibility */}
-              <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/75 to-black/35 lg:from-black/90 lg:via-black/65 lg:to-black/25 z-10 pointer-events-none" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/60 z-10 pointer-events-none" />
+              {/* Voile sombre uniforme pour la lisibilité du titre */}
+              <div className="absolute inset-0 bg-black/45 pointer-events-none" />
 
-              {/* Slide Content Layer: Titre, Texte et 1 Bouton CTA Commander */}
-              <div className="relative z-20 w-full h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center pt-24 pb-20 sm:pt-28 sm:pb-24">
-                <div className="max-w-2xl sm:max-w-3xl space-y-3 sm:space-y-4 text-left">
-                  {/* Badge thématique optionnel */}
-                  {slide.tag && (
-                    <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#C62828] text-white text-xs font-bold tracking-wider uppercase shadow-md">
-                      <Utensils className="w-3.5 h-3.5 text-[#FFE082]" />
-                      <span>{slide.tag}</span>
-                    </div>
-                  )}
+              <div className="relative z-20 h-full max-w-5xl mx-auto px-6 flex flex-col items-center justify-center text-center">
+                {slide.tag && (
+                  <span className="label-caps text-[11px] sm:text-xs text-gold-light mb-5">{slide.tag}</span>
+                )}
 
-                  {/* Titre de la diapositive */}
-                  <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight drop-shadow-xl">
-                    {slide.title}
-                  </h1>
+                <h1 className="font-serif italic text-white text-3xl sm:text-5xl lg:text-6xl leading-[1.15] tracking-tight drop-shadow-lg">
+                  {slide.title}
+                </h1>
 
-                  {/* Texte de la diapositive */}
-                  <p className="text-xs sm:text-sm md:text-base text-stone-200 max-w-xl font-normal leading-relaxed drop-shadow-md">
-                    {slide.description}
-                  </p>
+                <p className="mt-6 text-sm sm:text-base text-white/85 max-w-xl leading-relaxed font-light">
+                  {slide.description}
+                </p>
 
-                  {/* 1 Seul Bouton CTA Commander */}
-                  <div className="pt-2 sm:pt-3">
-                    <button
-                      type="button"
-                      onClick={() => handlePrimaryAction(slide)}
-                      id={`hero-action-btn-${index}`}
-                      className="bg-[#C62828] hover:bg-[#8E1B1B] text-white px-7 sm:px-8 py-3.5 sm:py-4 rounded-xl font-bold text-sm sm:text-base shadow-2xl shadow-[#C62828]/60 transition-all transform active:scale-95 flex items-center justify-center gap-2 cursor-pointer group border border-red-400/40 inline-flex"
-                    >
-                      <span>{slide.actionText || 'Commander'}</span>
-                      <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1.5 transition-transform" />
-                    </button>
-                  </div>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => handlePrimaryAction(slide)}
+                  id={`hero-action-btn-${index}`}
+                  className="btn-outline mt-8 text-white hover:bg-white hover:text-ink"
+                >
+                  {slide.actionText || 'Commander'}
+                </button>
               </div>
             </div>
           );
         })}
 
-        {/* Previous Slide Button — masqué sur mobile/tablette (chevauche le texte), navigation via les points en bas */}
+        {/* Indicateurs de diapositive : simples traits fins */}
+        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2">
+          {slides.map((slide, idx) => (
+            <button
+              key={`hero-dot-${idx}`}
+              type="button"
+              onClick={() => goToSlide(idx)}
+              className={`h-px transition-all duration-500 cursor-pointer ${
+                idx === currentIndex ? 'w-10 bg-white' : 'w-5 bg-white/40 hover:bg-white/70'
+              }`}
+              aria-label={`Aller à la diapositive ${idx + 1}`}
+              title={slide.title || `Diapositive ${idx + 1}`}
+            />
+          ))}
+        </div>
+
+        {/* Flèche ronde vers la carte */}
+        <button
+          type="button"
+          onClick={scrollToMenu}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 w-11 h-11 rounded-full border border-white/80 text-white flex items-center justify-center hover:bg-white hover:text-ink transition-colors cursor-pointer animate-nudge"
+          aria-label="Voir la carte"
+        >
+          <ChevronDown className="w-5 h-5" strokeWidth={1.5} />
+        </button>
+
+        {/* Flèches précédente / suivante, très discrètes (bureau) */}
         <button
           type="button"
           onClick={(e) => {
             e.stopPropagation();
             prevSlide();
           }}
-          className="hidden lg:flex absolute left-6 top-1/2 -translate-y-1/2 z-30 w-13 h-13 rounded-full bg-black/40 hover:bg-[#C62828] text-white backdrop-blur-md border border-white/20 items-center justify-center transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-lg"
+          className="hidden lg:flex absolute left-6 top-1/2 -translate-y-1/2 z-30 p-2 text-white/60 hover:text-white transition-colors cursor-pointer"
           aria-label="Diapositive précédente"
-          title="Diapositive précédente"
         >
-          <ChevronLeft className="w-6 h-6" />
+          <ChevronLeft className="w-8 h-8" strokeWidth={1} />
         </button>
-
-        {/* Next Slide Button — masqué sur mobile/tablette (chevauche le texte), navigation via les points en bas */}
         <button
           type="button"
           onClick={(e) => {
             e.stopPropagation();
             nextSlide();
           }}
-          className="hidden lg:flex absolute right-6 top-1/2 -translate-y-1/2 z-30 w-13 h-13 rounded-full bg-black/40 hover:bg-[#C62828] text-white backdrop-blur-md border border-white/20 items-center justify-center transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-lg"
+          className="hidden lg:flex absolute right-6 top-1/2 -translate-y-1/2 z-30 p-2 text-white/60 hover:text-white transition-colors cursor-pointer"
           aria-label="Diapositive suivante"
-          title="Diapositive suivante"
         >
-          <ChevronRight className="w-6 h-6" />
+          <ChevronRight className="w-8 h-8" strokeWidth={1} />
         </button>
-
-        {/* ========================================================================= */}
-        {/* BOTTOM SLIDE INDICATORS (JUSTE LES BOUTONS - SANS LES CHIFFRES 01/03)     */}
-        {/* ========================================================================= */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex items-center gap-3 bg-black/40 backdrop-blur-md px-4 py-2.5 rounded-full border border-white/20 shadow-lg">
-          {slides.map((slide, idx) => {
-            const isActive = idx === currentIndex;
-            return (
-              <button
-                key={`hero-dot-${idx}`}
-                type="button"
-                onClick={() => goToSlide(idx)}
-                className={`transition-all duration-300 rounded-full cursor-pointer flex items-center justify-center ${
-                  isActive
-                    ? 'w-10 h-3 bg-[#C62828] shadow-md shadow-[#C62828]/50 ring-2 ring-white/30'
-                    : 'w-3 h-3 bg-white/50 hover:bg-white hover:scale-110'
-                }`}
-                aria-label={`Aller à la diapositive ${idx + 1}`}
-                title={slide.title || `Diapositive ${idx + 1}`}
-              />
-            );
-          })}
-        </div>
       </div>
 
-      {/* ========================================================================= */}
-      {/* 3 AVANTAGES STRIP UNDER HERO (FOND BLANC PUR)                            */}
-      {/* ========================================================================= */}
-      <div className="bg-white border-b border-stone-200 py-7 relative z-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="flex items-center gap-4 bg-stone-50/70 p-4 rounded-2xl border border-stone-200/80 hover:bg-stone-50 transition-colors">
-              <div className="w-12 h-12 rounded-xl bg-[#C62828]/10 text-[#C62828] flex items-center justify-center shrink-0">
-                <Leaf className="w-6 h-6" />
+      {/* Trois engagements, séparés par de fines bordures */}
+      <div className="bg-white">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-5">
+          <div className="grid grid-cols-1 md:grid-cols-3 border border-hairline md:divide-x divide-y md:divide-y-0 divide-hairline">
+            {[
+              { title: 'Produits frais', text: 'Ingrédients sélectionnés chaque matin auprès des producteurs locaux.' },
+              { title: 'Fait maison', text: 'Pâtes pétries, nems dorés et bouillons mijotés selon la tradition.' },
+              { title: 'Service rapide', text: 'Préparé minute, en livraison express ou à emporter.' },
+            ].map((item) => (
+              <div key={item.title} className="px-8 py-9 text-center">
+                <h3 className="font-serif text-lg text-cocoa">{item.title}</h3>
+                <p className="mt-2 text-sm text-stone-500 font-light leading-relaxed max-w-xs mx-auto">{item.text}</p>
               </div>
-              <div>
-                <h3 className="text-base font-bold text-[#1F1F1F]">Produits frais</h3>
-                <p className="text-xs text-stone-600 mt-0.5">
-                  Ingrédients rigoureusement sélectionnés chaque matin auprès des producteurs locaux.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4 bg-stone-50/70 p-4 rounded-2xl border border-stone-200/80 hover:bg-stone-50 transition-colors">
-              <div className="w-12 h-12 rounded-xl bg-amber-500/15 text-[#8E1B1B] flex items-center justify-center shrink-0">
-                <Utensils className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-[#1F1F1F]">Préparation maison</h3>
-                <p className="text-xs text-stone-600 mt-0.5">
-                  Pâtes fraîches pétries, nems dorés et bouillons mijotés selon les secrets ancestraux.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4 bg-stone-50/70 p-4 rounded-2xl border border-stone-200/80 hover:bg-stone-50 transition-colors">
-              <div className="w-12 h-12 rounded-xl bg-stone-900 text-[#FFE082] flex items-center justify-center shrink-0">
-                <Clock className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-[#1F1F1F]">Service rapide</h3>
-                <p className="text-xs text-stone-600 mt-0.5">
-                  Commandes préparées minute pour livraison express ou retrait sur place à récupérer.
-                </p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </div>
@@ -402,7 +353,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenCustomizer, isAdmin }) => {
             {/* Header */}
             <div className="px-6 py-4 border-b border-stone-200 flex items-center justify-between bg-stone-50">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-[#C62828] text-white flex items-center justify-center">
+                <div className="w-9 h-9 rounded-xl bg-[#1C2B4A] text-white flex items-center justify-center">
                   <Layers className="w-5 h-5" />
                 </div>
                 <div>
@@ -433,7 +384,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenCustomizer, isAdmin }) => {
                   onClick={() => setEditingSlideIndex(idx)}
                   className={`pb-3 px-4 text-xs font-bold transition-all border-b-2 cursor-pointer ${
                     editingSlideIndex === idx
-                      ? 'border-[#C62828] text-[#C62828]'
+                      ? 'border-[#1C2B4A] text-[#1C2B4A]'
                       : 'border-transparent text-stone-500 hover:text-stone-800'
                   }`}
                 >
@@ -463,7 +414,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenCustomizer, isAdmin }) => {
                     })
                   }
                   placeholder="Ex: Le grand bol traditionnel fumant aux nems croustillants"
-                  className="w-full p-2.5 rounded-xl border border-stone-200 focus:outline-none focus:border-[#C62828] bg-white text-sm"
+                  className="w-full p-2.5 rounded-xl border border-stone-200 focus:outline-none focus:border-[#1C2B4A] bg-white text-sm"
                 />
               </div>
 
@@ -481,7 +432,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenCustomizer, isAdmin }) => {
                     })
                   }
                   placeholder="Description détaillée du plat ou de la spécialité mise en avant..."
-                  className="w-full p-2.5 rounded-xl border border-stone-200 focus:outline-none focus:border-[#C62828] bg-white text-xs leading-relaxed"
+                  className="w-full p-2.5 rounded-xl border border-stone-200 focus:outline-none focus:border-[#1C2B4A] bg-white text-xs leading-relaxed"
                 />
               </div>
 
@@ -500,7 +451,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenCustomizer, isAdmin }) => {
                       })
                     }
                     placeholder="Ex: Commander"
-                    className="w-full p-2.5 rounded-xl border border-stone-200 focus:outline-none focus:border-[#C62828] bg-white text-xs"
+                    className="w-full p-2.5 rounded-xl border border-stone-200 focus:outline-none focus:border-[#1C2B4A] bg-white text-xs"
                   />
                 </div>
 
@@ -515,7 +466,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenCustomizer, isAdmin }) => {
                         actionTarget: e.target.value as 'customizer' | 'menu',
                       })
                     }
-                    className="w-full p-2.5 rounded-xl border border-stone-200 focus:outline-none focus:border-[#C62828] bg-white text-xs cursor-pointer"
+                    className="w-full p-2.5 rounded-xl border border-stone-200 focus:outline-none focus:border-[#1C2B4A] bg-white text-xs cursor-pointer"
                   >
                     <option value="menu">Défiler vers le Menu de commande</option>
                     <option value="customizer">Ouvrir le Composeur de Soupe</option>
@@ -554,7 +505,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenCustomizer, isAdmin }) => {
                   type="button"
                   onClick={handleSaveSlides}
                   disabled={isSaving}
-                  className="bg-[#C62828] hover:bg-[#8E1B1B] text-white px-5 py-2 rounded-xl font-bold text-xs shadow-md transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                  className="bg-[#1C2B4A] hover:bg-[#0F1A30] text-white px-5 py-2 rounded-xl font-bold text-xs shadow-md transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
                 >
                   {saveSuccess ? (
                     <>

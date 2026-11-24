@@ -59,9 +59,9 @@ export const SoupCustomizerModal: React.FC<SoupCustomizerModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
-      <div className="bg-[#FFF9F0] w-full max-w-4xl rounded-3xl shadow-2xl border border-[#EBDCC5] overflow-hidden animate-in zoom-in-95 duration-200 my-4 flex flex-col max-h-[92vh]">
+      <div className="bg-[#FFFFFF] w-full max-w-4xl rounded-3xl shadow-2xl border border-[#E6DECF] overflow-hidden animate-in zoom-in-95 duration-200 my-4 flex flex-col max-h-[92vh]">
         {/* Modal Header */}
-        <div className="relative bg-gradient-to-r from-[#8E1B1B] via-[#A82020] to-[#C62828] text-white p-5 sm:p-7">
+        <div className="relative bg-gradient-to-r from-[#0F1A30] via-[#A82020] to-[#1C2B4A] text-white p-5 sm:p-7">
           <button
             onClick={onClose}
             className="absolute right-4 top-4 text-white/70 hover:text-white p-2 rounded-full hover:bg-white/10 transition-colors cursor-pointer"
@@ -71,13 +71,13 @@ export const SoupCustomizerModal: React.FC<SoupCustomizerModalProps> = ({
           </button>
 
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-3 py-0.5 rounded-full bg-[#F4C542] text-[#1F1F1F] text-[11px] font-extrabold uppercase tracking-wider shadow-xs">
+            <span className="px-3 py-0.5 rounded-full bg-[#B8975A] text-[#1F1F1F] text-[11px] font-extrabold uppercase tracking-wider shadow-xs">
               ✨ Atelier Sur-Mesure
             </span>
             <span className="text-xs text-white/80 font-medium">Spécialité du Chef</span>
           </div>
 
-          <h3 className="font-serif text-2xl sm:text-3xl font-extrabold text-[#FFE082]">
+          <h3 className="font-serif text-2xl sm:text-3xl font-extrabold text-[#E9D9B4]">
             {product.name}
           </h3>
 
@@ -89,10 +89,10 @@ export const SoupCustomizerModal: React.FC<SoupCustomizerModalProps> = ({
         {/* Modal Body */}
         <div className="p-5 sm:p-7 space-y-7 flex-1 overflow-y-auto">
           {/* Base Inclus Card */}
-          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#EBDCC5] shadow-xs">
+          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#E6DECF] shadow-xs">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-3.5">
-                <div className="w-14 h-14 rounded-2xl overflow-hidden shrink-0 border-2 border-[#FFE082] shadow-xs">
+                <div className="w-14 h-14 rounded-2xl overflow-hidden shrink-0 border-2 border-[#E9D9B4] shadow-xs">
                   <img
                     src={product.image || 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=400&q=80'}
                     alt="Base Soupe"
@@ -104,7 +104,7 @@ export const SoupCustomizerModal: React.FC<SoupCustomizerModalProps> = ({
                   <p className="text-xs text-stone-500">Inclus d'office dans votre grand bol impérial</p>
                 </div>
               </div>
-              <span className="font-serif text-base sm:text-lg font-extrabold text-[#C62828] bg-[#C62828]/10 px-4 py-1.5 rounded-xl self-start sm:self-auto border border-[#C62828]/20">
+              <span className="font-serif text-base sm:text-lg font-extrabold text-[#1C2B4A] bg-[#1C2B4A]/10 px-4 py-1.5 rounded-xl self-start sm:self-auto border border-[#1C2B4A]/20">
                 {formatPrice(basePrice)}
               </span>
             </div>
@@ -131,7 +131,7 @@ export const SoupCustomizerModal: React.FC<SoupCustomizerModalProps> = ({
 
           {/* Garnitures au Choix Libre avec grandes photos culinaires */}
           <div>
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-4 pb-2 border-b border-[#EBDCC5]/70">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-4 pb-2 border-b border-[#E6DECF]/70">
               <div>
                 <h4 className="text-sm sm:text-base font-bold text-[#1F1F1F] uppercase tracking-wider flex items-center gap-2">
                   <span>Garnitures au choix libre</span>
@@ -140,7 +140,7 @@ export const SoupCustomizerModal: React.FC<SoupCustomizerModalProps> = ({
                   Photos de nos garnitures fraîches. Cliquez sur un ingrédient pour l'ajouter à votre soupe.
                 </p>
               </div>
-              <span className="text-xs font-bold px-3.5 py-1.5 rounded-full bg-[#C62828]/10 text-[#8E1B1B] border border-[#C62828]/20 shrink-0 self-start sm:self-auto">
+              <span className="text-xs font-bold px-3.5 py-1.5 rounded-full bg-[#1C2B4A]/10 text-[#0F1A30] border border-[#1C2B4A]/20 shrink-0 self-start sm:self-auto">
                 {selectedToppings.length} garniture{selectedToppings.length > 1 ? 's' : ''} choisie{selectedToppings.length > 1 ? 's' : ''}
               </span>
             </div>
@@ -157,8 +157,8 @@ export const SoupCustomizerModal: React.FC<SoupCustomizerModalProps> = ({
                     id={`topping-btn-${topping.id}`}
                     className={`group relative rounded-2xl overflow-hidden border-2 text-left transition-all duration-300 cursor-pointer flex flex-col justify-between bg-white shadow-xs hover:shadow-lg ${
                       isChecked
-                        ? 'border-[#C62828] ring-4 ring-[#C62828]/15 scale-[1.01]'
-                        : 'border-[#EBDCC5]/90 hover:border-[#F4C542]'
+                        ? 'border-[#1C2B4A] ring-4 ring-[#1C2B4A]/15 scale-[1.01]'
+                        : 'border-[#E6DECF]/90 hover:border-[#B8975A]'
                     }`}
                   >
                     {/* Grande Image Culinaire Mise en Avant */}
@@ -182,7 +182,7 @@ export const SoupCustomizerModal: React.FC<SoupCustomizerModalProps> = ({
 
                       {/* Badge Prix Flottant en Haut à Gauche */}
                       <div className="absolute top-2.5 left-2.5 pointer-events-none">
-                        <span className="inline-flex items-center gap-1 bg-black/80 backdrop-blur-md text-[#FFE082] px-2.5 py-1 rounded-xl text-xs font-black shadow-md border border-white/15">
+                        <span className="inline-flex items-center gap-1 bg-black/80 backdrop-blur-md text-[#E9D9B4] px-2.5 py-1 rounded-xl text-xs font-black shadow-md border border-white/15">
                           +{formatPrice(topping.price)}
                         </span>
                       </div>
@@ -190,12 +190,12 @@ export const SoupCustomizerModal: React.FC<SoupCustomizerModalProps> = ({
                       {/* Badge Statut en Haut à Droite */}
                       <div className="absolute top-2.5 right-2.5 pointer-events-none">
                         {isChecked ? (
-                          <span className="inline-flex items-center gap-1 bg-[#C62828] text-white px-2.5 py-1 rounded-xl text-xs font-bold shadow-md animate-in zoom-in-75 duration-200">
+                          <span className="inline-flex items-center gap-1 bg-[#1C2B4A] text-white px-2.5 py-1 rounded-xl text-xs font-bold shadow-md animate-in zoom-in-75 duration-200">
                             <Check className="w-3.5 h-3.5 stroke-[3]" />
                             <span>Choisi</span>
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 bg-white/90 text-stone-800 px-2.5 py-1 rounded-xl text-xs font-semibold shadow-sm backdrop-blur-xs group-hover:bg-[#F4C542] group-hover:text-stone-900 transition-colors">
+                          <span className="inline-flex items-center gap-1 bg-white/90 text-stone-800 px-2.5 py-1 rounded-xl text-xs font-semibold shadow-sm backdrop-blur-xs group-hover:bg-[#B8975A] group-hover:text-stone-900 transition-colors">
                             <Plus className="w-3.5 h-3.5" />
                             <span>Ajouter</span>
                           </span>
@@ -223,15 +223,15 @@ export const SoupCustomizerModal: React.FC<SoupCustomizerModalProps> = ({
 
                       {/* Bouton d'action interactif en pied de carte */}
                       <div className="mt-3 pt-2.5 border-t border-stone-100 flex items-center justify-between text-xs">
-                        <span className={`font-bold transition-colors ${isChecked ? 'text-[#C62828]' : 'text-stone-700'}`}>
+                        <span className={`font-bold transition-colors ${isChecked ? 'text-[#1C2B4A]' : 'text-stone-700'}`}>
                           {isChecked ? '✓ Sélectionné' : `+${formatPrice(topping.price)}`}
                         </span>
 
                         <div
                           className={`px-3 py-1 rounded-lg font-bold text-[11px] flex items-center gap-1 transition-all ${
                             isChecked
-                              ? 'bg-[#C62828] text-white shadow-xs'
-                              : 'bg-stone-100 group-hover:bg-[#F4C542]/25 text-stone-700'
+                              ? 'bg-[#1C2B4A] text-white shadow-xs'
+                              : 'bg-stone-100 group-hover:bg-[#B8975A]/25 text-stone-700'
                           }`}
                         >
                           {isChecked ? (
@@ -264,12 +264,12 @@ export const SoupCustomizerModal: React.FC<SoupCustomizerModalProps> = ({
               placeholder="Ex. Coriandre à part, bouillon très chaud..."
               value={customNotes}
               onChange={(e) => setCustomNotes(e.target.value)}
-              className="w-full text-xs p-2.5 rounded-xl border border-stone-200 bg-white focus:outline-none focus:border-[#C62828]"
+              className="w-full text-xs p-2.5 rounded-xl border border-stone-200 bg-white focus:outline-none focus:border-[#1C2B4A]"
             />
           </div>
 
           {/* Récapitulatif dynamique des coûts */}
-          <div className="bg-amber-50/70 p-4 rounded-2xl border border-[#FFE082] text-xs space-y-1.5">
+          <div className="bg-amber-50/70 p-4 rounded-2xl border border-[#E9D9B4] text-xs space-y-1.5">
             <div className="flex justify-between text-stone-600">
               <span>Base Soupe Demi-Lune :</span>
               <span className="font-semibold text-stone-800">{formatPrice(basePrice)}</span>
@@ -280,19 +280,19 @@ export const SoupCustomizerModal: React.FC<SoupCustomizerModalProps> = ({
                 <span>
                   Garnitures ({selectedToppings.length}) :
                 </span>
-                <span className="font-semibold text-[#8E1B1B]">+{formatPrice(toppingsTotal)}</span>
+                <span className="font-semibold text-[#0F1A30]">+{formatPrice(toppingsTotal)}</span>
               </div>
             )}
 
-            <div className="flex justify-between items-baseline pt-2 border-t border-[#FFE082]/60 font-bold text-sm">
+            <div className="flex justify-between items-baseline pt-2 border-t border-[#E9D9B4]/60 font-bold text-sm">
               <span className="text-[#1F1F1F]">Prix par bol :</span>
-              <span className="font-serif text-base text-[#C62828]">{formatPrice(unitPrice)}</span>
+              <span className="font-serif text-base text-[#1C2B4A]">{formatPrice(unitPrice)}</span>
             </div>
           </div>
         </div>
 
         {/* Modal Footer with Quantity and Submit */}
-        <div className="p-4 sm:p-5 bg-white border-t border-[#EBDCC5] flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="p-4 sm:p-5 bg-white border-t border-[#E6DECF] flex flex-col sm:flex-row items-center justify-between gap-4">
           {/* Quantity Selector */}
           <div className="flex items-center gap-3">
             <span className="text-xs font-bold text-stone-700">Quantité :</span>
@@ -324,7 +324,7 @@ export const SoupCustomizerModal: React.FC<SoupCustomizerModalProps> = ({
             type="button"
             onClick={handleAddToCart}
             id="confirm-soup-customizer-btn"
-            className="w-full sm:w-auto flex-1 bg-[#C62828] hover:bg-[#8E1B1B] text-white py-3.5 px-6 rounded-xl font-bold text-xs sm:text-sm shadow-md shadow-[#C62828]/25 transition-all transform active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full sm:w-auto flex-1 bg-[#1C2B4A] hover:bg-[#0F1A30] text-white py-3.5 px-6 rounded-xl font-bold text-xs sm:text-sm shadow-md shadow-[#1C2B4A]/25 transition-all transform active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
           >
             {isSuccess ? (
               <>

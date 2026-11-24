@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 
-const COLORS = ['#C62828', '#F4C542', '#8E1B1B', '#25D366', '#FFE082', '#1F1F1F'];
+const COLORS = ['#1C2B4A', '#B8975A', '#0F1A30', '#25D366', '#E9D9B4', '#1F1F1F'];
 
 interface ConfettiBurstProps {
   count?: number;

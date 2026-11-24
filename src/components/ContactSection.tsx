@@ -152,11 +152,11 @@ export const ContactSection: React.FC = () => {
   return (
     <section id="contact" className="py-20 md:py-28 bg-white border-t border-stone-200 relative overflow-hidden">
       {/* Illustrations décoratives en fond */}
-      <div className="absolute left-0 top-0 w-96 h-96 bg-radial from-[#C62828]/8 to-transparent blur-3xl pointer-events-none" />
+      <div className="absolute left-0 top-0 w-96 h-96 bg-radial from-[#1C2B4A]/8 to-transparent blur-3xl pointer-events-none" />
 
       <svg
         viewBox="0 0 100 100"
-        className="hidden md:block absolute -right-6 top-8 w-52 h-52 text-[#C62828] opacity-[0.08] pointer-events-none rotate-[8deg]"
+        className="hidden md:block absolute -right-6 top-8 w-52 h-52 text-[#1C2B4A] opacity-[0.08] pointer-events-none rotate-[8deg]"
         fill="none" stroke="currentColor" strokeWidth="1.5"
       >
         {/* Épingle de localisation */}
@@ -166,7 +166,7 @@ export const ContactSection: React.FC = () => {
 
       <svg
         viewBox="0 0 100 100"
-        className="hidden lg:block absolute left-4 bottom-0 w-44 h-44 text-[#8E1B1B] opacity-[0.07] pointer-events-none rotate-[-6deg]"
+        className="hidden lg:block absolute left-4 bottom-0 w-44 h-44 text-[#0F1A30] opacity-[0.07] pointer-events-none rotate-[-6deg]"
         fill="none" stroke="currentColor" strokeWidth="1.5"
       >
         {/* Table dressée (assiette, baguettes) */}
@@ -178,7 +178,7 @@ export const ContactSection: React.FC = () => {
 
       <svg
         viewBox="0 0 100 100"
-        className="hidden md:block absolute right-1/4 bottom-4 w-32 h-32 text-[#F4C542] opacity-[0.10] pointer-events-none rotate-[5deg]"
+        className="hidden md:block absolute right-1/4 bottom-4 w-32 h-32 text-[#B8975A] opacity-[0.10] pointer-events-none rotate-[5deg]"
         fill="none" stroke="currentColor" strokeWidth="1.5"
       >
         {/* Calendrier de réservation */}
@@ -193,7 +193,7 @@ export const ContactSection: React.FC = () => {
 
       <svg
         viewBox="0 0 100 100"
-        className="hidden lg:block absolute left-1/3 top-4 w-28 h-28 text-[#C62828] opacity-[0.09] pointer-events-none rotate-[-5deg]"
+        className="hidden lg:block absolute left-1/3 top-4 w-28 h-28 text-[#1C2B4A] opacity-[0.09] pointer-events-none rotate-[-5deg]"
         fill="none" stroke="currentColor" strokeWidth="1.5"
       >
         {/* Horloge (horaires d'ouverture) */}
@@ -204,7 +204,7 @@ export const ContactSection: React.FC = () => {
 
       <svg
         viewBox="0 0 100 100"
-        className="hidden md:block absolute right-6 bottom-40 w-28 h-28 text-[#8E1B1B] opacity-[0.09] pointer-events-none rotate-[7deg]"
+        className="hidden md:block absolute right-6 bottom-40 w-28 h-28 text-[#0F1A30] opacity-[0.09] pointer-events-none rotate-[7deg]"
         fill="none" stroke="currentColor" strokeWidth="1.5"
       >
         {/* Cloche de service */}
@@ -216,7 +216,7 @@ export const ContactSection: React.FC = () => {
 
       <svg
         viewBox="0 0 100 100"
-        className="hidden xl:block absolute left-6 bottom-8 w-36 h-36 text-[#F4C542] opacity-[0.10] pointer-events-none rotate-[-4deg]"
+        className="hidden xl:block absolute left-6 bottom-8 w-36 h-36 text-[#B8975A] opacity-[0.10] pointer-events-none rotate-[-4deg]"
         fill="none" stroke="currentColor" strokeWidth="1.5"
       >
         {/* Scooter de livraison */}
@@ -230,7 +230,7 @@ export const ContactSection: React.FC = () => {
 
       <svg
         viewBox="0 0 100 100"
-        className="hidden lg:block absolute right-1/3 top-1/2 -translate-y-1/2 w-32 h-32 text-[#C62828] opacity-[0.08] pointer-events-none rotate-[3deg]"
+        className="hidden lg:block absolute right-1/3 top-1/2 -translate-y-1/2 w-32 h-32 text-[#1C2B4A] opacity-[0.08] pointer-events-none rotate-[3deg]"
         fill="none" stroke="currentColor" strokeWidth="1.5"
       >
         {/* Table en terrasse avec parasol */}
@@ -246,7 +246,7 @@ export const ContactSection: React.FC = () => {
         {/* Section Header */}
         <FadeIn>
         <div className="text-center max-w-3xl mx-auto space-y-3 mb-12 md:mb-16">
-          <div className="inline-flex items-center px-3.5 py-1 rounded-full bg-[#C62828]/10 text-[#8E1B1B] text-xs font-bold tracking-wider uppercase">
+          <div className="inline-flex items-center px-3.5 py-1 rounded-full bg-[#1C2B4A]/10 text-[#0F1A30] text-xs font-bold tracking-wider uppercase">
             <span>ACCÈS & RÉSERVATION</span>
           </div>
 
@@ -265,9 +265,9 @@ export const ContactSection: React.FC = () => {
           <FadeIn className="lg:col-span-5 space-y-6">
           <div className="space-y-6">
             {/* Practical info cards */}
-            <div className="bg-white p-6 rounded-2xl border border-[#EBDCC5] shadow-xs space-y-5">
+            <div className="bg-white p-6 rounded-2xl border border-[#E6DECF] shadow-xs space-y-5">
               <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-xl bg-[#C62828]/10 text-[#C62828] flex items-center justify-center shrink-0 mt-0.5">
+                <div className="w-10 h-10 rounded-xl bg-[#1C2B4A]/10 text-[#1C2B4A] flex items-center justify-center shrink-0 mt-0.5">
                   <MapPin className="w-5 h-5" />
                 </div>
                 <div>
@@ -284,7 +284,7 @@ export const ContactSection: React.FC = () => {
               </div>
 
               <div className="flex items-start gap-4 pt-4 border-t border-stone-100">
-                <div className="w-10 h-10 rounded-xl bg-[#F4C542]/20 text-[#8E1B1B] flex items-center justify-center shrink-0 mt-0.5">
+                <div className="w-10 h-10 rounded-xl bg-[#B8975A]/20 text-[#0F1A30] flex items-center justify-center shrink-0 mt-0.5">
                   <Phone className="w-5 h-5" />
                 </div>
                 <div>
@@ -309,7 +309,7 @@ export const ContactSection: React.FC = () => {
                       rel="noreferrer"
                       title="Facebook"
                       aria-label="Facebook"
-                      className="w-8 h-8 inline-flex items-center justify-center rounded-lg bg-white border border-[#EBDCC5] hover:border-[#1877F2] hover:bg-[#1877F2]/10 text-[#1877F2] transition-all shadow-2xs hover:scale-105 active:scale-95"
+                      className="w-8 h-8 inline-flex items-center justify-center rounded-lg bg-white border border-[#E6DECF] hover:border-[#1877F2] hover:bg-[#1877F2]/10 text-[#1877F2] transition-all shadow-2xs hover:scale-105 active:scale-95"
                     >
                       <SocialIcon platform="facebook" size={16} className="text-[#1877F2]" />
                     </a>
@@ -321,7 +321,7 @@ export const ContactSection: React.FC = () => {
                       rel="noreferrer"
                       title="Instagram"
                       aria-label="Instagram"
-                      className="w-8 h-8 inline-flex items-center justify-center rounded-lg bg-white border border-[#EBDCC5] hover:border-[#DD2A7B] hover:bg-[#DD2A7B]/10 text-[#DD2A7B] transition-all shadow-2xs hover:scale-105 active:scale-95"
+                      className="w-8 h-8 inline-flex items-center justify-center rounded-lg bg-white border border-[#E6DECF] hover:border-[#DD2A7B] hover:bg-[#DD2A7B]/10 text-[#DD2A7B] transition-all shadow-2xs hover:scale-105 active:scale-95"
                     >
                       <SocialIcon platform="instagram" size={16} className="text-[#DD2A7B]" />
                     </a>
@@ -333,7 +333,7 @@ export const ContactSection: React.FC = () => {
                       rel="noreferrer"
                       title="TikTok"
                       aria-label="TikTok"
-                      className="w-8 h-8 inline-flex items-center justify-center rounded-lg bg-white border border-[#EBDCC5] hover:border-black hover:bg-stone-100 text-[#1F1F1F] transition-all shadow-2xs hover:scale-105 active:scale-95"
+                      className="w-8 h-8 inline-flex items-center justify-center rounded-lg bg-white border border-[#E6DECF] hover:border-black hover:bg-stone-100 text-[#1F1F1F] transition-all shadow-2xs hover:scale-105 active:scale-95"
                     >
                       <SocialIcon platform="tiktok" size={16} />
                     </a>
@@ -368,7 +368,7 @@ export const ContactSection: React.FC = () => {
               </div>
 
               <div className="flex items-start gap-4 pt-4 border-t border-stone-100">
-                <div className="w-10 h-10 rounded-xl bg-[#C62828]/10 text-[#C62828] flex items-center justify-center shrink-0 mt-0.5">
+                <div className="w-10 h-10 rounded-xl bg-[#1C2B4A]/10 text-[#1C2B4A] flex items-center justify-center shrink-0 mt-0.5">
                   <Clock className="w-5 h-5" />
                 </div>
                 <div>
@@ -386,7 +386,7 @@ export const ContactSection: React.FC = () => {
             </div>
 
             {/* Google Maps réel (embed sans clé API) */}
-            <div className="bg-white rounded-2xl border border-[#EBDCC5] overflow-hidden shadow-xs relative aspect-[16/9]">
+            <div className="bg-white rounded-2xl border border-[#E6DECF] overflow-hidden shadow-xs relative aspect-[16/9]">
               <iframe
                 title={`Localisation ${settings.name}`}
                 src={`https://www.google.com/maps?q=${encodeURIComponent(settings.address)}&output=embed`}
@@ -410,9 +410,9 @@ export const ContactSection: React.FC = () => {
           {/* Right Column: Interactive Functional Form */}
           <FadeIn delay={0.15} className="lg:col-span-7">
           <div>
-            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-[#EBDCC5] shadow-md relative">
+            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-[#E6DECF] shadow-md relative">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-[#C62828] text-white flex items-center justify-center shadow-xs">
+                <div className="w-10 h-10 rounded-xl bg-[#1C2B4A] text-white flex items-center justify-center shadow-xs">
                   <MessageSquare className="w-5 h-5" />
                 </div>
                 <div>
@@ -498,7 +498,7 @@ export const ContactSection: React.FC = () => {
                         href={`tel:${settings.phone}`}
                         className="flex-1 py-2.5 px-3 bg-white border border-stone-200 hover:bg-stone-50 text-stone-700 rounded-xl font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors"
                       >
-                        <Phone className="w-3.5 h-3.5 text-[#C62828]" />
+                        <Phone className="w-3.5 h-3.5 text-[#1C2B4A]" />
                         <span>Appeler</span>
                       </a>
 
@@ -539,7 +539,7 @@ export const ContactSection: React.FC = () => {
                           onClick={() => handleTypeChange(item.type as MessageRequestType)}
                           className={`py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all border text-center cursor-pointer ${
                             requestType === item.type
-                              ? 'bg-[#1F1F1F] text-[#F4C542] border-[#1F1F1F] shadow-xs scale-102'
+                              ? 'bg-[#1F1F1F] text-[#B8975A] border-[#1F1F1F] shadow-xs scale-102'
                               : 'bg-stone-50 hover:bg-stone-100 text-stone-700 border-stone-200'
                           }`}
                         >
@@ -553,7 +553,7 @@ export const ContactSection: React.FC = () => {
                   {requestType === 'order_special' && (
                     <div className="p-4 rounded-2xl bg-amber-50/50 border border-amber-200/80 space-y-3 animate-in fade-in duration-200">
                       <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900 uppercase tracking-wider">
-                        <Calendar className="w-3.5 h-3.5 text-[#C62828]" />
+                        <Calendar className="w-3.5 h-3.5 text-[#1C2B4A]" />
                         <span>Date & Heure de l'événement</span>
                       </div>
 
@@ -568,7 +568,7 @@ export const ContactSection: React.FC = () => {
                             min={new Date().toISOString().split('T')[0]}
                             value={formState.reservationDate}
                             onChange={(e) => setFormState({ ...formState, reservationDate: e.target.value })}
-                            className="w-full text-xs p-2.5 rounded-xl border border-stone-300 bg-white focus:outline-none focus:border-[#C62828]"
+                            className="w-full text-xs p-2.5 rounded-xl border border-stone-300 bg-white focus:outline-none focus:border-[#1C2B4A]"
                           />
                         </div>
 
@@ -579,7 +579,7 @@ export const ContactSection: React.FC = () => {
                           <select
                             value={formState.reservationTime}
                             onChange={(e) => setFormState({ ...formState, reservationTime: e.target.value })}
-                            className="w-full text-xs p-2.5 rounded-xl border border-stone-300 bg-white focus:outline-none focus:border-[#C62828] font-medium"
+                            className="w-full text-xs p-2.5 rounded-xl border border-stone-300 bg-white focus:outline-none focus:border-[#1C2B4A] font-medium"
                           >
                             <optgroup label="Midi & Déjeuner">
                               <option value="11h30">11h30</option>
@@ -613,7 +613,7 @@ export const ContactSection: React.FC = () => {
                   {requestType === 'reservation' && (
                     <div className="p-4 rounded-2xl bg-amber-50/50 border border-amber-200/80 space-y-3 animate-in fade-in duration-200">
                       <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900 uppercase tracking-wider">
-                        <Calendar className="w-3.5 h-3.5 text-[#C62828]" />
+                        <Calendar className="w-3.5 h-3.5 text-[#1C2B4A]" />
                         <span>Créneau & Nombre de personnes</span>
                       </div>
 
@@ -628,7 +628,7 @@ export const ContactSection: React.FC = () => {
                             min={new Date().toISOString().split('T')[0]}
                             value={formState.reservationDate}
                             onChange={(e) => setFormState({ ...formState, reservationDate: e.target.value })}
-                            className="w-full text-xs p-2.5 rounded-xl border border-stone-300 bg-white focus:outline-none focus:border-[#C62828]"
+                            className="w-full text-xs p-2.5 rounded-xl border border-stone-300 bg-white focus:outline-none focus:border-[#1C2B4A]"
                           />
                         </div>
 
@@ -639,7 +639,7 @@ export const ContactSection: React.FC = () => {
                           <select
                             value={formState.reservationTime}
                             onChange={(e) => setFormState({ ...formState, reservationTime: e.target.value })}
-                            className="w-full text-xs p-2.5 rounded-xl border border-stone-300 bg-white focus:outline-none focus:border-[#C62828] font-medium"
+                            className="w-full text-xs p-2.5 rounded-xl border border-stone-300 bg-white focus:outline-none focus:border-[#1C2B4A] font-medium"
                           >
                             <optgroup label="Midi (Déjeuner)">
                               <option value="11h45">11h45</option>
@@ -665,7 +665,7 @@ export const ContactSection: React.FC = () => {
                           <select
                             value={formState.guestsCount}
                             onChange={(e) => setFormState({ ...formState, guestsCount: Number(e.target.value) })}
-                            className="w-full text-xs p-2.5 rounded-xl border border-stone-300 bg-white focus:outline-none focus:border-[#C62828] font-medium"
+                            className="w-full text-xs p-2.5 rounded-xl border border-stone-300 bg-white focus:outline-none focus:border-[#1C2B4A] font-medium"
                           >
                             {[1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 15, 20].map((n) => (
                               <option key={n} value={n}>
@@ -690,7 +690,7 @@ export const ContactSection: React.FC = () => {
                         placeholder="Votre nom et prénom"
                         value={formState.name}
                         onChange={(e) => setFormState({ ...formState, name: e.target.value })}
-                        className="w-full text-xs p-3 rounded-xl border border-stone-200 bg-stone-50/50 focus:bg-white focus:outline-none focus:border-[#C62828]"
+                        className="w-full text-xs p-3 rounded-xl border border-stone-200 bg-stone-50/50 focus:bg-white focus:outline-none focus:border-[#1C2B4A]"
                       />
                     </div>
 
@@ -704,7 +704,7 @@ export const ContactSection: React.FC = () => {
                         placeholder="+261 34 00 000 00"
                         value={formState.phone}
                         onChange={(e) => setFormState({ ...formState, phone: e.target.value })}
-                        className="w-full text-xs p-3 rounded-xl border border-stone-200 bg-stone-50/50 focus:bg-white focus:outline-none focus:border-[#C62828]"
+                        className="w-full text-xs p-3 rounded-xl border border-stone-200 bg-stone-50/50 focus:bg-white focus:outline-none focus:border-[#1C2B4A]"
                       />
                     </div>
                   </div>
@@ -720,7 +720,7 @@ export const ContactSection: React.FC = () => {
                         placeholder="votre@email.com"
                         value={formState.email}
                         onChange={(e) => setFormState({ ...formState, email: e.target.value })}
-                        className="w-full text-xs p-3 rounded-xl border border-stone-200 bg-stone-50/50 focus:bg-white focus:outline-none focus:border-[#C62828]"
+                        className="w-full text-xs p-3 rounded-xl border border-stone-200 bg-stone-50/50 focus:bg-white focus:outline-none focus:border-[#1C2B4A]"
                       />
                     </div>
 
@@ -734,7 +734,7 @@ export const ContactSection: React.FC = () => {
                         placeholder="Ex. Réservation d'une grande table, etc."
                         value={formState.subject}
                         onChange={(e) => setFormState({ ...formState, subject: e.target.value })}
-                        className="w-full text-xs p-3 rounded-xl border border-stone-200 bg-stone-50/50 focus:bg-white focus:outline-none focus:border-[#C62828]"
+                        className="w-full text-xs p-3 rounded-xl border border-stone-200 bg-stone-50/50 focus:bg-white focus:outline-none focus:border-[#1C2B4A]"
                       />
                     </div>
                   </div>
@@ -760,14 +760,14 @@ export const ContactSection: React.FC = () => {
                       }
                       value={formState.message}
                       onChange={(e) => setFormState({ ...formState, message: e.target.value })}
-                      className="w-full text-xs p-3 rounded-xl border border-stone-200 bg-stone-50/50 focus:bg-white focus:outline-none focus:border-[#C62828]"
+                      className="w-full text-xs p-3 rounded-xl border border-stone-200 bg-stone-50/50 focus:bg-white focus:outline-none focus:border-[#1C2B4A]"
                     />
                   </div>
 
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-[#C62828] hover:bg-[#8E1B1B] text-white py-3.5 px-4 rounded-xl font-bold text-sm shadow-md shadow-[#C62828]/25 transition-all transform active:scale-98 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    className="w-full bg-[#1C2B4A] hover:bg-[#0F1A30] text-white py-3.5 px-4 rounded-xl font-bold text-sm shadow-md shadow-[#1C2B4A]/25 transition-all transform active:scale-98 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                   >
                     <Send className="w-4 h-4" />
                     <span>
