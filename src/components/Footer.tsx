@@ -22,34 +22,25 @@ export const Footer: React.FC = () => {
   ].filter(Boolean) as { platform: 'facebook' | 'instagram' | 'tiktok' | 'whatsapp'; href: string; label: string; size: number }[];
 
   return (
-    <footer className="bg-white border-t border-hairline mt-16">
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-10">
-        {/* Nom du restaurant */}
-        <div className="text-center">
-          <div className="font-serif italic text-3xl text-ink">{settings.name}</div>
-          <div className="mt-2 label-caps text-[10px] text-gold">
-            {settings.tagline || 'Maison culinaire asiatique'}
+    <footer className="bg-[#111111] text-white/70">
+      <div className="max-w-[1180px] mx-auto px-6 sm:px-10 pt-20 pb-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+          <div>
+            <div className="font-display uppercase tracking-[0.14em] text-xl text-white">{settings.name}</div>
+            {settings.description && <p className="mt-5 text-sm leading-[1.8]">{settings.description}</p>}
           </div>
-          {settings.description && (
-            <p className="mt-6 max-w-xl mx-auto text-sm text-stone-500 font-light leading-relaxed">
-              {settings.description}
-            </p>
-          )}
-        </div>
 
-        {/* Trois colonnes à fines bordures */}
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 border border-hairline md:divide-x divide-y md:divide-y-0 divide-hairline text-center">
-          <div className="px-6 py-8">
-            <h4 className="label-caps text-[11px] text-ink">Navigation</h4>
-            <ul className="mt-4 space-y-2 text-sm font-light text-stone-500">
+          <div>
+            <h4 className="label-caps text-[12px] text-white">Navigation</h4>
+            <ul className="mt-6 space-y-3 text-sm">
               {[
                 { id: 'accueil', label: 'Accueil' },
+                { id: 'le-chef', label: 'Notre maison' },
                 { id: 'menu', label: 'La carte' },
-                { id: 'le-chef', label: 'Le chef' },
                 { id: 'contact', label: 'Contact & accès' },
               ].map((l) => (
                 <li key={l.id}>
-                  <button onClick={() => scrollToSection(l.id)} className="hover:text-ink transition-colors cursor-pointer">
+                  <button onClick={() => scrollToSection(l.id)} className="hover:text-white transition-colors cursor-pointer">
                     {l.label}
                   </button>
                 </li>
@@ -57,19 +48,18 @@ export const Footer: React.FC = () => {
             </ul>
           </div>
 
-          <div className="px-6 py-8">
-            <h4 className="label-caps text-[11px] text-ink">Horaires</h4>
-            <p className="mt-4 text-sm font-light text-stone-500 whitespace-pre-line">{settings.openingHours}</p>
-            <p className="mt-3 text-xs italic text-stone-400">Livraison à domicile et plats à emporter.</p>
+          <div>
+            <h4 className="label-caps text-[12px] text-white">Horaires</h4>
+            <p className="mt-6 text-sm leading-[1.8] whitespace-pre-line">{settings.openingHours}</p>
+            <p className="mt-3 text-xs text-white/50">Livraison à domicile et plats à emporter.</p>
           </div>
 
-          <div className="px-6 py-8">
-            <h4 className="label-caps text-[11px] text-ink">Contact</h4>
-            <p className="mt-4 text-sm font-light text-stone-500">{settings.address}</p>
-            <p className="mt-1 text-sm font-light text-stone-500">{settings.phone}</p>
-
+          <div>
+            <h4 className="label-caps text-[12px] text-white">Contact</h4>
+            <p className="mt-6 text-sm leading-[1.8]">{settings.address}</p>
+            <p className="mt-1 text-sm">{settings.phone}</p>
             {socials.length > 0 && (
-              <div className="mt-5 flex items-center justify-center gap-3">
+              <div className="mt-6 flex items-center gap-2">
                 {socials.map((s) => (
                   <a
                     key={s.platform}
@@ -78,7 +68,7 @@ export const Footer: React.FC = () => {
                     rel="noreferrer"
                     title={s.label}
                     aria-label={s.label}
-                    className="w-9 h-9 rounded-full border border-hairline text-ink flex items-center justify-center hover:bg-ink hover:text-white hover:border-ink transition-colors"
+                    className="w-9 h-9 bg-white/10 text-white flex items-center justify-center hover:bg-accent transition-colors"
                   >
                     <SocialIcon platform={s.platform} size={s.size} />
                   </a>
@@ -88,7 +78,7 @@ export const Footer: React.FC = () => {
           </div>
         </div>
 
-        <div className="mt-10 text-center label-caps text-[10px] text-stone-400">
+        <div className="mt-16 pt-8 border-t border-white/10 text-center label-caps !font-normal text-[10px] text-white/40">
           © {new Date().getFullYear()} {settings.name} · Tous droits réservés
         </div>
       </div>

@@ -1,57 +1,106 @@
 @import "tailwindcss";
 
 /*
- * Identité visuelle : sobre et élégante, inspirée des pâtisseries fines.
- * - Encre marine pour la navigation et les boutons
- * - Doré discret pour les prix et les accents
- * - Fines bordures beiges qui dessinent une grille
- * - Titres en serif (Libre Baskerville), textes et libellés en sans géométrique (Jost)
+ * Identité visuelle « visuel 2 » : contrastée et éditoriale.
+ * - Noir et blanc, rouge de la marque pour les prix, doré pour les icônes
+ * - Titres de section en majuscules espacées encadrés de deux traits fins
+ * - Grands titres en police étroite (Oswald), textes en Open Sans
  */
 @theme {
-  --font-display: 'Libre Baskerville', Georgia, serif;
-  --font-serif: 'Libre Baskerville', Georgia, serif;
-  --font-sans: 'Jost', system-ui, sans-serif;
+  --font-display: 'Oswald', 'Arial Narrow', sans-serif;
+  --font-serif: 'Open Sans', system-ui, sans-serif;
+  --font-sans: 'Open Sans', system-ui, sans-serif;
 
-  --color-ink: #1C2B4A;
-  --color-ink-dark: #0F1A30;
-  --color-gold: #B8975A;
+  --color-ink: #111111;
+  --color-ink-dark: #000000;
+  --color-accent: #C62828;
+  --color-gold: #C9A050;
   --color-gold-light: #E9D9B4;
-  --color-hairline: #E6DECF;
-  --color-cocoa: #5B4A42;
+  --color-hairline: #E5E5E5;
+  --color-cocoa: #111111;
+  --color-paper: #F7F6F4;
 
   /* Anciens noms conservés pour compatibilité */
-  --color-asian-red: #1C2B4A;
-  --color-asian-darkred: #0F1A30;
-  --color-asian-gold: #B8975A;
+  --color-asian-red: #C62828;
+  --color-asian-darkred: #8E1B1B;
+  --color-asian-gold: #C9A050;
   --color-asian-lightgold: #E9D9B4;
   --color-asian-cream: #FFFFFF;
-  --color-asian-charcoal: #1F1F1F;
+  --color-asian-charcoal: #111111;
 }
 
-/* Libellé en petites capitales espacées (navigation, sur-titres, boutons) */
+/* Libellé en petites capitales espacées */
 .label-caps {
   font-family: var(--font-sans);
   text-transform: uppercase;
-  letter-spacing: 0.18em;
-  font-weight: 500;
+  letter-spacing: 0.16em;
+  font-weight: 600;
 }
 
-/* Bouton contour fin, façon « READ BIO » */
+/* Titre de section : majuscules espacées entre deux doubles traits fins */
+.section-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.75rem;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #111111;
+}
+.section-title::before,
+.section-title::after {
+  content: '';
+  width: 4.5rem;
+  height: 4px;
+  border-top: 1px solid #D5D5D5;
+  border-bottom: 1px solid #D5D5D5;
+  flex-shrink: 0;
+}
+
+/* Petit trait sous les blocs de texte */
+.dash {
+  display: block;
+  width: 1.75rem;
+  height: 1px;
+  background: #111111;
+}
+
+/* Boutons */
 .btn-outline {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.85rem 1.9rem;
-  border: 1px solid currentColor;
+  padding: 0.8rem 1.8rem;
+  border: 2px solid currentColor;
   font-family: var(--font-sans);
-  font-size: 0.75rem;
-  font-weight: 500;
+  font-size: 0.72rem;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.2em;
   transition: background-color 0.25s, color 0.25s, border-color 0.25s;
   cursor: pointer;
 }
+.btn-solid {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.9rem;
+  background: #111111;
+  color: #FFFFFF;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  border-radius: 3px;
+  transition: background-color 0.25s;
+  cursor: pointer;
+}
+.btn-solid:hover { background: #C62828; }
 
 /* Steam keyframe animation for hot soup/dishes */
 @keyframes steam {
@@ -99,9 +148,9 @@
   background: #FFFFFF;
 }
 ::-webkit-scrollbar-thumb {
-  background: #E6DECF;
+  background: #D5D5D5;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #B8975A;
+  background: #C62828;
 }

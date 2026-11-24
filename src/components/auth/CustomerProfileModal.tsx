@@ -137,7 +137,7 @@ export const CustomerProfileModal: React.FC = () => {
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-200">
       <div className="bg-[#FFFFFF] w-full max-w-2xl rounded-3xl shadow-2xl border border-[#E6DECF] overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header with profile banner */}
-        <div className="bg-gradient-to-r from-[#1F1F1F] via-[#331111] to-[#0F1A30] text-white p-6 relative shrink-0">
+        <div className="bg-gradient-to-r from-[#1F1F1F] via-[#331111] to-[#000000] text-white p-6 relative shrink-0">
           <button
             onClick={() => setIsProfileOpen(false)}
             className="absolute top-4 right-4 p-2 text-white/80 hover:text-white rounded-full hover:bg-white/10 transition-colors"
@@ -147,7 +147,7 @@ export const CustomerProfileModal: React.FC = () => {
           </button>
 
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-[#1C2B4A] text-white border-2 border-[#E9D9B4]/50 flex items-center justify-center font-serif text-2xl font-bold shadow-lg shrink-0">
+            <div className="w-16 h-16 rounded-2xl bg-[#111111] text-white border-2 border-[#E9D9B4]/50 flex items-center justify-center font-serif text-2xl font-bold shadow-lg shrink-0">
               {customer.fullName ? customer.fullName.charAt(0).toUpperCase() : 'C'}
             </div>
 
@@ -164,13 +164,13 @@ export const CustomerProfileModal: React.FC = () => {
               <div className="flex flex-wrap items-center gap-3 text-xs text-white/80 mt-1">
                 {customer.phone && (
                   <span className="flex items-center gap-1">
-                    <Phone className="w-3.5 h-3.5 text-[#B8975A]" />
+                    <Phone className="w-3.5 h-3.5 text-[#C62828]" />
                     {customer.phone}
                   </span>
                 )}
                 {customer.email && (
                   <span className="flex items-center gap-1">
-                    <Mail className="w-3.5 h-3.5 text-[#B8975A]" />
+                    <Mail className="w-3.5 h-3.5 text-[#C62828]" />
                     {customer.email}
                   </span>
                 )}
@@ -223,7 +223,7 @@ export const CustomerProfileModal: React.FC = () => {
             onClick={() => setActiveTab('orders')}
             className={`py-3.5 px-4 text-xs font-bold border-b-2 flex items-center gap-2 transition-colors cursor-pointer ${
               activeTab === 'orders'
-                ? 'border-[#1C2B4A] text-[#1C2B4A]'
+                ? 'border-[#111111] text-[#111111]'
                 : 'border-transparent text-stone-600 hover:text-stone-900'
             }`}
           >
@@ -234,7 +234,7 @@ export const CustomerProfileModal: React.FC = () => {
             onClick={() => setActiveTab('details')}
             className={`py-3.5 px-4 text-xs font-bold border-b-2 flex items-center gap-2 transition-colors cursor-pointer ${
               activeTab === 'details'
-                ? 'border-[#1C2B4A] text-[#1C2B4A]'
+                ? 'border-[#111111] text-[#111111]'
                 : 'border-transparent text-stone-600 hover:text-stone-900'
             }`}
           >
@@ -254,7 +254,7 @@ export const CustomerProfileModal: React.FC = () => {
                 </span>
                 <button
                   onClick={refreshOrders}
-                  className="text-xs text-[#1C2B4A] hover:underline flex items-center gap-1 font-semibold cursor-pointer"
+                  className="text-xs text-[#111111] hover:underline flex items-center gap-1 font-semibold cursor-pointer"
                 >
                   <RotateCcw className="w-3 h-3" />
                   <span>Actualiser</span>
@@ -263,7 +263,7 @@ export const CustomerProfileModal: React.FC = () => {
 
               {customerOrders.length === 0 ? (
                 <div className="text-center py-12 px-4 bg-white rounded-2xl border border-[#E6DECF]/80">
-                  <div className="w-14 h-14 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-3 text-[#1C2B4A]">
+                  <div className="w-14 h-14 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-3 text-[#111111]">
                     <ShoppingBag className="w-7 h-7" />
                   </div>
                   <h4 className="font-serif text-base font-bold text-stone-900">
@@ -278,7 +278,7 @@ export const CustomerProfileModal: React.FC = () => {
                       const elem = document.getElementById('menu');
                       if (elem) elem.scrollIntoView({ behavior: 'smooth' });
                     }}
-                    className="mt-4 px-5 py-2.5 bg-[#1C2B4A] text-white text-xs font-bold rounded-xl hover:bg-[#0F1A30] transition-colors inline-flex items-center gap-1.5"
+                    className="mt-4 px-5 py-2.5 bg-[#111111] text-white text-xs font-bold rounded-xl hover:bg-[#000000] transition-colors inline-flex items-center gap-1.5"
                   >
                     <span>Découvrir le menu</span>
                     <ChevronRight className="w-4 h-4" />
@@ -323,7 +323,7 @@ export const CustomerProfileModal: React.FC = () => {
                               </span>
                               <span>{it.name}</span>
                               {it.toppings && it.toppings.length > 0 && (
-                                <span className="text-[10px] text-[#1C2B4A] bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
+                                <span className="text-[10px] text-[#111111] bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
                                   +{it.toppings.join(', ')}
                                 </span>
                               )}
@@ -352,7 +352,7 @@ export const CustomerProfileModal: React.FC = () => {
                         </span>
                         <div className="text-right">
                           <span className="font-bold text-stone-500 mr-2 text-[11px]">Total:</span>
-                          <span className="font-serif font-extrabold text-[#1C2B4A] text-sm">
+                          <span className="font-serif font-extrabold text-[#111111] text-sm">
                             {formatPrice(order.total)}
                           </span>
                         </div>
@@ -376,7 +376,7 @@ export const CustomerProfileModal: React.FC = () => {
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-stone-200 text-xs focus:outline-none focus:border-[#1C2B4A]"
+                    className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-stone-200 text-xs focus:outline-none focus:border-[#111111]"
                   />
                 </div>
               </div>
@@ -393,7 +393,7 @@ export const CustomerProfileModal: React.FC = () => {
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="034 12 345 67"
-                      className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-stone-200 text-xs focus:outline-none focus:border-[#1C2B4A]"
+                      className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-stone-200 text-xs focus:outline-none focus:border-[#111111]"
                     />
                   </div>
                 </div>
@@ -409,7 +409,7 @@ export const CustomerProfileModal: React.FC = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="client@gmail.com"
-                      className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-stone-200 text-xs focus:outline-none focus:border-[#1C2B4A]"
+                      className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-stone-200 text-xs focus:outline-none focus:border-[#111111]"
                     />
                   </div>
                 </div>
@@ -426,7 +426,7 @@ export const CustomerProfileModal: React.FC = () => {
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                     placeholder="Lot / Rue / Bâtiment"
-                    className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-stone-200 text-xs focus:outline-none focus:border-[#1C2B4A]"
+                    className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-stone-200 text-xs focus:outline-none focus:border-[#111111]"
                   />
                 </div>
               </div>
@@ -438,7 +438,7 @@ export const CustomerProfileModal: React.FC = () => {
                 <select
                   value={district}
                   onChange={(e) => setDistrict(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-xl border border-stone-200 text-xs focus:outline-none focus:border-[#1C2B4A] bg-white"
+                  className="w-full px-3 py-2.5 rounded-xl border border-stone-200 text-xs focus:outline-none focus:border-[#111111] bg-white"
                 >
                   <option value="Antanimena">Antanimena</option>
                   <option value="Ankorondrano">Ankorondrano</option>
@@ -467,7 +467,7 @@ export const CustomerProfileModal: React.FC = () => {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="w-full sm:w-auto px-6 py-2.5 bg-[#1C2B4A] hover:bg-[#0F1A30] text-white rounded-xl font-bold text-xs shadow-md shadow-[#1C2B4A]/25 flex items-center justify-center gap-2 transition-all cursor-pointer"
+                  className="w-full sm:w-auto px-6 py-2.5 bg-[#111111] hover:bg-[#000000] text-white rounded-xl font-bold text-xs shadow-md shadow-[#111111]/25 flex items-center justify-center gap-2 transition-all cursor-pointer"
                 >
                   <Save className="w-4 h-4" />
                   <span>{saving ? 'Enregistrement...' : 'Enregistrer les modifications'}</span>

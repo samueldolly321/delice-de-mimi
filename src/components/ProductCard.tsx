@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Plus, Check } from 'lucide-react';
 import { Product } from '../types';
 import { useCart } from '../context/CartContext';
 
@@ -14,9 +15,9 @@ const BADGE_LABELS: Record<string, string> = {
 };
 
 /**
- * Fiche plat façon « vitrine » : une cellule de grille à fines bordures,
- * la photo au centre, le nom en serif et le prix en petites capitales dorées.
- * Le bouton d'ajout apparaît en contour fin sous le prix.
+ * Fiche plat « visuel 2 » : photo avec le prix en rouge dans une étiquette
+ * blanche posée en bas à droite, nom en capitales espacées, description,
+ * puis un petit trait et le bouton d'ajout.
  */
 export const ProductCard: React.FC<ProductCardProps> = ({ product, onCustomize }) => {
   const { addToCart, formatPrice } = useCart();
@@ -41,24 +42,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onCustomize }
       : BADGE_LABELS[product.badge] || product.badge
     : null;
 
-  const buttonLabel = justAdded
-    ? 'Ajouté ✓'
-    : product.isCustomizable
-    ? 'Composer'
-    : product.isAvailable
-    ? 'Ajouter au panier'
-    : 'Épuisé';
+  const details = [
+    product.preparationTime,
+    product.spiceLevel !== undefined && product.spiceLevel > 0 ? (product.spiceLevel === 1 ? 'Doux' : 'Épicé') : null,
+  ].filter(Boolean);
 
   return (
-    <div
-      id={`product-card-${product.id}`}
-      className="group relative h-full bg-white flex flex-col items-center text-center px-6 pt-7 pb-10 sm:px-8"
-    >
-      {/* Étiquette (ligne réservée même vide pour garder les photos alignées) */}
-      <div className="h-4 mb-4 label-caps text-[10px] text-gold">{badgeLabel}</div>
-
-      {/* Photo */}
-      <div className="relative w-full aspect-[4/3] overflow-hidden">
+    <div id={`product-card-${product.id}`} className="group h-full flex flex-col">
+      {/* Photo + étiquette de prix */}
+      <div className="relative aspect-[3/2] overflow-hidden bg-stone-200">
         <img
           src={product.image}
           alt={product.name}
@@ -68,43 +60,52 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onCustomize }
           loading="lazy"
           referrerPolicy="no-referrer"
         />
+
+        {badgeLabel && (
+          <span className="absolute top-0 left-0 bg-black text-white label-caps text-[9px] px-3 py-1.5">{badgeLabel}</span>
+        )}
+
+        <span className="absolute bottom-0 right-0 bg-white font-display text-accent text-[17px] tracking-wide px-5 py-2.5">
+          {formatPrice(product.price)}
+        </span>
       </div>
 
-      {/* Nom, description et prix */}
-      <h3 className="mt-7 font-serif text-lg sm:text-xl text-cocoa leading-snug">{product.name}</h3>
-
+      {/* Texte */}
+      <h3 className="mt-7 label-caps text-[13px] text-ink leading-snug">{product.name}</h3>
       {product.description && (
-        <p className="mt-2 text-sm text-stone-500 font-light leading-relaxed line-clamp-2 max-w-sm">
-          {product.description}
-        </p>
+        <p className="mt-3 text-[14px] text-stone-500 leading-[1.7] line-clamp-2">{product.description}</p>
       )}
+      {details.length > 0 && <p className="mt-2 text-[12px] text-stone-400">{details.join(' · ')}</p>}
 
-      <div className="mt-3 flex items-center gap-3 text-[12px] italic tracking-[0.12em] text-gold">
-        <span>{formatPrice(product.price)}</span>
-        {product.preparationTime && (
-          <span className="not-italic text-stone-400 tracking-normal text-[11px]">· {product.preparationTime}</span>
-        )}
-        {product.spiceLevel !== undefined && product.spiceLevel > 0 && (
-          <span className="not-italic text-stone-400 tracking-normal text-[11px]">
-            · {product.spiceLevel === 1 ? 'Doux' : 'Épicé'}
-          </span>
-        )}
+      <div className="mt-auto pt-6 flex items-center justify-between gap-4">
+        <span className="dash" />
+        <button
+          onClick={handleAdd}
+          disabled={!product.isAvailable}
+          title={product.isCustomizable ? 'Personnaliser ma soupe' : product.isAvailable ? 'Ajouter au panier' : 'Épuisé'}
+          className={`inline-flex items-center gap-2 label-caps text-[10px] px-4 py-2.5 rounded-[3px] transition-colors ${
+            justAdded
+              ? 'bg-emerald-700 text-white'
+              : product.isAvailable
+              ? 'bg-ink text-white hover:bg-accent cursor-pointer'
+              : 'bg-stone-200 text-stone-500 cursor-not-allowed'
+          }`}
+        >
+          {justAdded ? (
+            <>
+              <Check className="w-3.5 h-3.5" /> Ajouté
+            </>
+          ) : product.isCustomizable ? (
+            'Composer'
+          ) : product.isAvailable ? (
+            <>
+              <Plus className="w-3.5 h-3.5" /> Ajouter
+            </>
+          ) : (
+            'Épuisé'
+          )}
+        </button>
       </div>
-
-      <button
-        onClick={handleAdd}
-        disabled={!product.isAvailable}
-        title={product.isCustomizable ? 'Personnaliser ma soupe' : product.isAvailable ? 'Ajouter au panier' : 'Épuisé'}
-        className={`btn-outline mt-6 !py-2.5 !px-5 !text-[11px] ${
-          justAdded
-            ? 'bg-ink text-white border-ink'
-            : product.isAvailable
-            ? 'text-ink border-ink/30 hover:bg-ink hover:text-white hover:border-ink'
-            : 'text-stone-400 border-stone-200 cursor-not-allowed'
-        }`}
-      >
-        {buttonLabel}
-      </button>
     </div>
   );
 };

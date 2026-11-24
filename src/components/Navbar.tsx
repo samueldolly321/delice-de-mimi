@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Menu as MenuIcon, X } from 'lucide-react';
+import { Menu as MenuIcon, X, ShoppingBag, User } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useCustomerAuth } from '../context/CustomerAuthContext';
 
+/**
+ * En-tête « visuel 2 » : transparent par-dessus la photo d'accueil (texte blanc),
+ * puis fond blanc et texte noir dès que l'on fait défiler la page.
+ * Logo et nom à gauche, liens en petites capitales à droite.
+ */
 export const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -19,9 +24,9 @@ export const Navbar: React.FC = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 30);
+      setIsScrolled(window.scrollY > 60);
 
-      const sections = ['accueil', 'menu', 'le-chef', 'contact'];
+      const sections = ['accueil', 'le-chef', 'menu', 'contact'];
       const scrollPosition = window.scrollY + 220;
 
       for (let i = sections.length - 1; i >= 0; i--) {
@@ -32,6 +37,7 @@ export const Navbar: React.FC = () => {
         }
       }
     };
+    handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -39,15 +45,13 @@ export const Navbar: React.FC = () => {
   const scrollToSection = (id: string) => {
     setActiveSection(id);
     setIsMobileMenuOpen(false);
-    const elem = document.getElementById(id);
-    if (elem) {
-      elem.scrollIntoView({ behavior: 'smooth' });
-    }
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const navItems = [
+    { id: 'accueil', label: 'Accueil' },
+    { id: 'le-chef', label: 'Notre maison' },
     { id: 'menu', label: 'La carte' },
-    { id: 'le-chef', label: 'Le chef' },
     { id: 'contact', label: 'Contact' },
   ];
 
@@ -62,130 +66,100 @@ export const Navbar: React.FC = () => {
     setIsProfileOpen(true);
   };
 
+  // Transparent uniquement en haut de page et menu mobile fermé
+  const solid = isScrolled || isMobileMenuOpen;
+  const textColor = solid ? 'text-ink' : 'text-white';
+
   const announcement =
     settings.topBarText ||
     settings.freeDeliveryNotice ||
     `Livraison offerte dès ${formatPrice(settings.freeDeliveryThreshold)}`;
 
   return (
-    <header className="sticky top-0 left-0 right-0 z-40">
-      {/* Bandeau d'annonce discret */}
-      <div className="bg-white border-b border-hairline text-gold text-[10px] sm:text-[11px] py-1.5 px-4 text-center label-caps truncate select-none">
+    <header className="fixed top-0 left-0 right-0 z-40">
+      {/* Fin bandeau noir d'annonce */}
+      <div className="bg-black text-white/80 text-[10px] sm:text-[11px] py-1.5 px-4 text-center label-caps !font-normal truncate select-none">
         {announcement}
-        {settings.phone && (
-          <span className="hidden md:inline text-ink/60">
-            {'  ·  '}
-            {settings.phone.split('/')[0]}
-          </span>
-        )}
+        {settings.phone && <span className="hidden md:inline text-white/50">{'   ·   '}{settings.phone.split('/')[0]}</span>}
       </div>
 
-      {/* Barre principale : liens à gauche, nom au centre, compte et panier à droite */}
       <nav
         id="main-navbar"
-        className={`bg-white transition-all duration-300 border-b ${
-          isScrolled ? 'py-3 border-hairline shadow-[0_1px_12px_rgba(28,43,74,0.06)]' : 'py-5 sm:py-6 border-transparent'
+        className={`transition-all duration-300 ${
+          solid ? 'bg-white shadow-[0_1px_0_#E5E5E5] py-3' : 'bg-transparent py-5'
         }`}
       >
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-[1fr_auto_1fr] items-center gap-4">
-          {/* Gauche : liens (bureau) ou menu burger (mobile) */}
-          <div className="flex items-center">
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden -ml-2 p-2 text-ink"
-              id="mobile-menu-toggle"
-              aria-label="Menu"
-            >
-              {isMobileMenuOpen ? <X className="w-6 h-6" strokeWidth={1.5} /> : <MenuIcon className="w-6 h-6" strokeWidth={1.5} />}
-            </button>
-
-            <div className="hidden lg:flex items-center gap-8">
-              {navItems.map((item) => {
-                const isActive = activeSection === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => scrollToSection(item.id)}
-                    id={`nav-link-${item.id}`}
-                    className={`label-caps text-[12px] py-1 border-b transition-colors cursor-pointer ${
-                      isActive ? 'text-ink border-ink' : 'text-ink/80 border-transparent hover:text-ink hover:border-ink/40'
-                    }`}
-                  >
-                    {item.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Centre : logo et nom du restaurant */}
+        <div className="max-w-[1180px] mx-auto px-4 sm:px-6 flex items-center justify-between gap-6">
+          {/* Logo + nom */}
           <a
             href="#accueil"
             onClick={(e) => {
               e.preventDefault();
               scrollToSection('accueil');
             }}
-            className="flex flex-col items-center text-center focus:outline-none group min-w-0"
+            className={`flex items-center gap-3 min-w-0 ${textColor}`}
             id="nav-logo"
           >
-            {settings.logoUrl && (
-              <img
-                src={settings.logoUrl}
-                alt=""
-                className={`rounded-full object-cover transition-all duration-300 ${
-                  isScrolled ? 'w-0 h-0 opacity-0' : 'w-10 h-10 sm:w-12 sm:h-12 mb-1.5 opacity-100'
-                }`}
-                referrerPolicy="no-referrer"
-              />
+            {settings.logoUrl ? (
+              <img src={settings.logoUrl} alt="" className="w-9 h-9 rounded-full object-cover bg-white shrink-0" referrerPolicy="no-referrer" />
+            ) : (
+              <span className={`w-9 h-9 rounded-full flex items-center justify-center font-bold shrink-0 ${solid ? 'bg-ink text-white' : 'bg-white text-ink'}`}>
+                {settings.logoText || '味'}
+              </span>
             )}
-            <span
-              className={`font-serif italic text-ink leading-none transition-all duration-300 ${
-                isScrolled ? 'text-xl sm:text-2xl' : 'text-2xl sm:text-3xl'
-              }`}
-            >
-              {settings.name}
-            </span>
-            <span className="hidden sm:block label-caps text-[10px] text-gold mt-1.5 max-w-[22rem] truncate">
-              {settings.tagline || 'Cuisine asiatique · Antananarivo'}
-            </span>
+            <span className="font-display uppercase tracking-[0.14em] text-base sm:text-lg truncate">{settings.name}</span>
           </a>
 
-          {/* Droite : compte client et panier */}
-          <div className="flex items-center justify-end gap-5 sm:gap-7">
-            {isLoggedIn && customer ? (
-              <button
-                onClick={openProfile}
-                id="nav-customer-profile-btn"
-                title="Mon profil et mes commandes"
-                className="hidden sm:inline label-caps text-[12px] text-gold hover:text-ink transition-colors cursor-pointer"
-              >
-                {customer.fullName.split(' ')[0]}
-              </button>
-            ) : (
-              <button
-                onClick={openLogin}
-                id="nav-customer-login-btn"
-                title="Connexion client"
-                className="hidden sm:inline label-caps text-[12px] text-gold hover:text-ink transition-colors cursor-pointer"
-              >
-                Connexion
-              </button>
-            )}
+          {/* Liens (bureau) */}
+          <div className="hidden lg:flex items-center gap-8">
+            {navItems.map((item) => {
+              const isActive = activeSection === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => scrollToSection(item.id)}
+                  id={`nav-link-${item.id}`}
+                  className={`label-caps text-[11px] py-1.5 border-b-2 transition-colors cursor-pointer ${textColor} ${
+                    isActive ? (solid ? 'border-ink' : 'border-white') : 'border-transparent opacity-85 hover:opacity-100'
+                  }`}
+                >
+                  {item.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Compte + panier */}
+          <div className={`flex items-center gap-4 sm:gap-5 shrink-0 ${textColor}`}>
+            <button
+              onClick={isLoggedIn && customer ? openProfile : openLogin}
+              id={isLoggedIn && customer ? 'nav-customer-profile-btn' : 'nav-customer-login-btn'}
+              title={isLoggedIn && customer ? 'Mon profil et mes commandes' : 'Connexion client'}
+              className="hidden sm:flex items-center gap-2 label-caps text-[11px] cursor-pointer hover:opacity-70 transition-opacity"
+            >
+              <User className="w-4 h-4" strokeWidth={1.75} />
+              <span>{isLoggedIn && customer ? customer.fullName.split(' ')[0] : 'Connexion'}</span>
+            </button>
 
             <button
               onClick={() => setIsCartOpen(true)}
               id="cart-drawer-trigger"
-              className="flex items-center gap-2 label-caps text-[12px] text-gold hover:text-ink transition-colors cursor-pointer group"
+              className="relative p-1 cursor-pointer hover:opacity-70 transition-opacity"
               aria-label="Voir le panier"
             >
-              <span className="hidden sm:inline">Panier</span>
-              <span
-                className={`w-7 h-7 rounded-full flex items-center justify-center text-[11px] tracking-normal transition-colors ${
-                  itemCount > 0 ? 'bg-gold text-white group-hover:bg-ink' : 'bg-gold/80 text-white'
-                }`}
-              >
+              <ShoppingBag className="w-5 h-5" strokeWidth={1.75} />
+              <span className="absolute -top-1.5 -right-2 min-w-[18px] h-[18px] px-1 rounded-full bg-accent text-white text-[10px] font-bold flex items-center justify-center">
                 {itemCount}
               </span>
+            </button>
+
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="lg:hidden p-1"
+              id="mobile-menu-toggle"
+              aria-label="Menu"
+            >
+              {isMobileMenuOpen ? <X className="w-6 h-6" strokeWidth={1.5} /> : <MenuIcon className="w-6 h-6" strokeWidth={1.5} />}
             </button>
           </div>
         </div>
@@ -193,28 +167,21 @@ export const Navbar: React.FC = () => {
         {/* Menu mobile */}
         {isMobileMenuOpen && (
           <div className="lg:hidden bg-white border-t border-hairline mt-3">
-            <div className="flex flex-col items-center py-4">
-              {[{ id: 'accueil', label: 'Accueil' }, ...navItems].map((item) => (
+            <div className="flex flex-col py-2">
+              {navItems.map((item) => (
                 <button
                   key={item.id}
                   onClick={() => scrollToSection(item.id)}
-                  className={`label-caps text-[13px] py-3 w-full text-center ${
-                    activeSection === item.id ? 'text-ink' : 'text-ink/70'
+                  className={`label-caps text-[12px] px-6 py-3.5 text-left border-b border-hairline ${
+                    activeSection === item.id ? 'text-accent' : 'text-ink'
                   }`}
                 >
                   {item.label}
                 </button>
               ))}
-              <div className="w-16 h-px bg-hairline my-3" />
-              {isLoggedIn && customer ? (
-                <button onClick={openProfile} className="label-caps text-[13px] py-3 text-gold">
-                  Mon profil ({customerOrders.length} cmd)
-                </button>
-              ) : (
-                <button onClick={openLogin} className="label-caps text-[13px] py-3 text-gold">
-                  Connexion / Inscription
-                </button>
-              )}
+              <button onClick={isLoggedIn && customer ? openProfile : openLogin} className="label-caps text-[12px] px-6 py-3.5 text-left text-ink">
+                {isLoggedIn && customer ? `Mon profil (${customerOrders.length} cmd)` : 'Connexion / Inscription'}
+              </button>
             </div>
           </div>
         )}

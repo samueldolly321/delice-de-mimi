@@ -49,7 +49,7 @@ export const CartDrawer: React.FC = () => {
           {/* Header */}
           <div className="p-5 border-b border-[#E6DECF] flex items-center justify-between bg-white">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-[#1C2B4A] text-white flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-[#111111] text-white flex items-center justify-center">
                 <ShoppingBag className="w-4 h-4" />
               </div>
               <div>
@@ -77,7 +77,7 @@ export const CartDrawer: React.FC = () => {
                 onClick={() => setDeliveryType('delivery')}
                 className={`py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                   deliveryType === 'delivery'
-                    ? 'bg-white text-[#1C2B4A] shadow-xs'
+                    ? 'bg-white text-[#111111] shadow-xs'
                     : 'text-stone-600 hover:text-stone-900'
                 }`}
               >
@@ -88,7 +88,7 @@ export const CartDrawer: React.FC = () => {
                 onClick={() => setDeliveryType('takeaway')}
                 className={`py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                   deliveryType === 'takeaway'
-                    ? 'bg-white text-[#1C2B4A] shadow-xs'
+                    ? 'bg-white text-[#111111] shadow-xs'
                     : 'text-stone-600 hover:text-stone-900'
                 }`}
               >
@@ -102,7 +102,7 @@ export const CartDrawer: React.FC = () => {
               <div className="mt-3">
                 {remainingForFreeDelivery > 0 ? (
                   <p className="text-[11px] text-stone-600 text-center">
-                    Ajoutez encore <strong className="text-[#1C2B4A]">{formatPrice(remainingForFreeDelivery)}</strong> pour bénéficier de la <span className="underline decoration-[#B8975A]">livraison offerte</span> !
+                    Ajoutez encore <strong className="text-[#111111]">{formatPrice(remainingForFreeDelivery)}</strong> pour bénéficier de la <span className="underline decoration-[#C62828]">livraison offerte</span> !
                   </p>
                 ) : (
                   <p className="text-[11px] text-emerald-700 font-bold text-center flex items-center justify-center gap-1">
@@ -128,7 +128,7 @@ export const CartDrawer: React.FC = () => {
                 </p>
                 <button
                   onClick={() => setIsCartOpen(false)}
-                  className="mt-5 px-5 py-2.5 bg-[#1C2B4A] text-white text-xs font-semibold rounded-xl hover:bg-[#0F1A30] transition-colors"
+                  className="mt-5 px-5 py-2.5 bg-[#111111] text-white text-xs font-semibold rounded-xl hover:bg-[#000000] transition-colors"
                 >
                   Voir les spécialités
                 </button>
@@ -160,7 +160,7 @@ export const CartDrawer: React.FC = () => {
                           {item.selectedToppings.map((top) => (
                             <span
                               key={top.id}
-                              className="inline-flex items-center text-[10px] bg-amber-50 text-[#0F1A30] px-1.5 py-0.5 rounded border border-[#E9D9B4]/70 font-semibold"
+                              className="inline-flex items-center text-[10px] bg-amber-50 text-[#000000] px-1.5 py-0.5 rounded border border-[#E9D9B4]/70 font-semibold"
                             >
                               +{top.name}
                             </span>
@@ -175,7 +175,7 @@ export const CartDrawer: React.FC = () => {
                         </div>
                       )}
 
-                      <div className="text-xs font-semibold text-[#1C2B4A] mt-1">
+                      <div className="text-xs font-semibold text-[#111111] mt-1">
                         {formatPrice(effectiveUnit)} / unité
                       </div>
 
@@ -240,7 +240,7 @@ export const CartDrawer: React.FC = () => {
               <div className="space-y-1.5 pt-2 border-t border-stone-100 text-xs">
                 <div className="flex justify-between items-baseline text-sm">
                   <span className="font-bold text-[#1F1F1F]">Montant de la nourriture</span>
-                  <span className="font-serif text-lg font-extrabold text-[#1C2B4A]">
+                  <span className="font-serif text-lg font-extrabold text-[#111111]">
                     {formatPrice(subtotal)}
                   </span>
                 </div>
@@ -253,7 +253,7 @@ export const CartDrawer: React.FC = () => {
                     ) : isFreeDelivery ? (
                       <span className="text-emerald-600 font-bold">Offerte</span>
                     ) : (
-                      <span className="text-[#1C2B4A] font-bold">à partir de {formatPrice(minDeliveryFee)}</span>
+                      <span className="text-[#111111] font-bold">à partir de {formatPrice(minDeliveryFee)}</span>
                     )}
                   </span>
                 </div>
@@ -273,7 +273,7 @@ export const CartDrawer: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => requireAuthToOrder()}
-                    className="text-[#1C2B4A] font-bold hover:underline shrink-0 ml-2"
+                    className="text-[#111111] font-bold hover:underline shrink-0 ml-2"
                   >
                     Connexion
                   </button>
@@ -291,7 +291,7 @@ export const CartDrawer: React.FC = () => {
               <button
                 onClick={handleProceedToCheckout}
                 id="btn-checkout-drawer"
-                className="w-full bg-[#1C2B4A] hover:bg-[#0F1A30] text-white py-3.5 px-4 rounded-xl font-bold text-sm shadow-md shadow-[#1C2B4A]/25 transition-all transform active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full bg-[#111111] hover:bg-[#000000] text-white py-3.5 px-4 rounded-xl font-bold text-sm shadow-md shadow-[#111111]/25 transition-all transform active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>Finaliser ma commande</span>
                 <ArrowRight className="w-4 h-4" />

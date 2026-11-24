@@ -150,13 +150,13 @@ export const ContactSection: React.FC = () => {
   };
 
   return (
-    <section id="contact" className="py-20 md:py-28 bg-white border-t border-stone-200 relative overflow-hidden">
+    <section id="contact" className="py-24 md:py-28 bg-white border-t border-stone-200 relative overflow-hidden scroll-mt-24">
       {/* Illustrations décoratives en fond */}
-      <div className="absolute left-0 top-0 w-96 h-96 bg-radial from-[#1C2B4A]/8 to-transparent blur-3xl pointer-events-none" />
+      <div className="absolute left-0 top-0 w-96 h-96 bg-radial from-[#111111]/8 to-transparent blur-3xl pointer-events-none" />
 
       <svg
         viewBox="0 0 100 100"
-        className="hidden md:block absolute -right-6 top-8 w-52 h-52 text-[#1C2B4A] opacity-[0.08] pointer-events-none rotate-[8deg]"
+        className="hidden md:block absolute -right-6 top-8 w-52 h-52 text-[#111111] opacity-[0.08] pointer-events-none rotate-[8deg]"
         fill="none" stroke="currentColor" strokeWidth="1.5"
       >
         {/* Épingle de localisation */}
@@ -166,7 +166,7 @@ export const ContactSection: React.FC = () => {
 
       <svg
         viewBox="0 0 100 100"
-        className="hidden lg:block absolute left-4 bottom-0 w-44 h-44 text-[#0F1A30] opacity-[0.07] pointer-events-none rotate-[-6deg]"
+        className="hidden lg:block absolute left-4 bottom-0 w-44 h-44 text-[#000000] opacity-[0.07] pointer-events-none rotate-[-6deg]"
         fill="none" stroke="currentColor" strokeWidth="1.5"
       >
         {/* Table dressée (assiette, baguettes) */}
@@ -178,7 +178,7 @@ export const ContactSection: React.FC = () => {
 
       <svg
         viewBox="0 0 100 100"
-        className="hidden md:block absolute right-1/4 bottom-4 w-32 h-32 text-[#B8975A] opacity-[0.10] pointer-events-none rotate-[5deg]"
+        className="hidden md:block absolute right-1/4 bottom-4 w-32 h-32 text-[#C62828] opacity-[0.10] pointer-events-none rotate-[5deg]"
         fill="none" stroke="currentColor" strokeWidth="1.5"
       >
         {/* Calendrier de réservation */}
@@ -193,7 +193,7 @@ export const ContactSection: React.FC = () => {
 
       <svg
         viewBox="0 0 100 100"
-        className="hidden lg:block absolute left-1/3 top-4 w-28 h-28 text-[#1C2B4A] opacity-[0.09] pointer-events-none rotate-[-5deg]"
+        className="hidden lg:block absolute left-1/3 top-4 w-28 h-28 text-[#111111] opacity-[0.09] pointer-events-none rotate-[-5deg]"
         fill="none" stroke="currentColor" strokeWidth="1.5"
       >
         {/* Horloge (horaires d'ouverture) */}
@@ -204,7 +204,7 @@ export const ContactSection: React.FC = () => {
 
       <svg
         viewBox="0 0 100 100"
-        className="hidden md:block absolute right-6 bottom-40 w-28 h-28 text-[#0F1A30] opacity-[0.09] pointer-events-none rotate-[7deg]"
+        className="hidden md:block absolute right-6 bottom-40 w-28 h-28 text-[#000000] opacity-[0.09] pointer-events-none rotate-[7deg]"
         fill="none" stroke="currentColor" strokeWidth="1.5"
       >
         {/* Cloche de service */}
@@ -216,7 +216,7 @@ export const ContactSection: React.FC = () => {
 
       <svg
         viewBox="0 0 100 100"
-        className="hidden xl:block absolute left-6 bottom-8 w-36 h-36 text-[#B8975A] opacity-[0.10] pointer-events-none rotate-[-4deg]"
+        className="hidden xl:block absolute left-6 bottom-8 w-36 h-36 text-[#C62828] opacity-[0.10] pointer-events-none rotate-[-4deg]"
         fill="none" stroke="currentColor" strokeWidth="1.5"
       >
         {/* Scooter de livraison */}
@@ -230,7 +230,7 @@ export const ContactSection: React.FC = () => {
 
       <svg
         viewBox="0 0 100 100"
-        className="hidden lg:block absolute right-1/3 top-1/2 -translate-y-1/2 w-32 h-32 text-[#1C2B4A] opacity-[0.08] pointer-events-none rotate-[3deg]"
+        className="hidden lg:block absolute right-1/3 top-1/2 -translate-y-1/2 w-32 h-32 text-[#111111] opacity-[0.08] pointer-events-none rotate-[3deg]"
         fill="none" stroke="currentColor" strokeWidth="1.5"
       >
         {/* Table en terrasse avec parasol */}
@@ -245,16 +245,10 @@ export const ContactSection: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         {/* Section Header */}
         <FadeIn>
-        <div className="text-center max-w-3xl mx-auto space-y-3 mb-12 md:mb-16">
-          <div className="inline-flex items-center px-3.5 py-1 rounded-full bg-[#1C2B4A]/10 text-[#0F1A30] text-xs font-bold tracking-wider uppercase">
-            <span>ACCÈS & RÉSERVATION</span>
-          </div>
+        <div className="text-center max-w-3xl mx-auto mb-14 md:mb-16">
+          <h2 className="section-title text-xl sm:text-2xl">Accès & réservation</h2>
 
-          <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#1F1F1F] tracking-tight">
-            Nous rendre visite & Réserver
-          </h2>
-
-          <p className="text-base sm:text-lg text-stone-600">
+          <p className="mt-8 max-w-xl mx-auto text-[15px] text-stone-500 leading-relaxed">
             Une question sur la carte, une réservation de table ou un événement d'entreprise ? Écrivez-nous directement ici.
           </p>
         </div>
@@ -267,7 +261,7 @@ export const ContactSection: React.FC = () => {
             {/* Practical info cards */}
             <div className="bg-white p-6 rounded-2xl border border-[#E6DECF] shadow-xs space-y-5">
               <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-xl bg-[#1C2B4A]/10 text-[#1C2B4A] flex items-center justify-center shrink-0 mt-0.5">
+                <div className="w-10 h-10 rounded-xl bg-[#111111]/10 text-[#111111] flex items-center justify-center shrink-0 mt-0.5">
                   <MapPin className="w-5 h-5" />
                 </div>
                 <div>
@@ -284,7 +278,7 @@ export const ContactSection: React.FC = () => {
               </div>
 
               <div className="flex items-start gap-4 pt-4 border-t border-stone-100">
-                <div className="w-10 h-10 rounded-xl bg-[#B8975A]/20 text-[#0F1A30] flex items-center justify-center shrink-0 mt-0.5">
+                <div className="w-10 h-10 rounded-xl bg-[#C62828]/20 text-[#000000] flex items-center justify-center shrink-0 mt-0.5">
                   <Phone className="w-5 h-5" />
                 </div>
                 <div>
@@ -368,7 +362,7 @@ export const ContactSection: React.FC = () => {
               </div>
 
               <div className="flex items-start gap-4 pt-4 border-t border-stone-100">
-                <div className="w-10 h-10 rounded-xl bg-[#1C2B4A]/10 text-[#1C2B4A] flex items-center justify-center shrink-0 mt-0.5">
+                <div className="w-10 h-10 rounded-xl bg-[#111111]/10 text-[#111111] flex items-center justify-center shrink-0 mt-0.5">
                   <Clock className="w-5 h-5" />
                 </div>
                 <div>
@@ -412,7 +406,7 @@ export const ContactSection: React.FC = () => {
           <div>
             <div className="bg-white p-6 sm:p-8 rounded-3xl border border-[#E6DECF] shadow-md relative">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-[#1C2B4A] text-white flex items-center justify-center shadow-xs">
+                <div className="w-10 h-10 rounded-xl bg-[#111111] text-white flex items-center justify-center shadow-xs">
                   <MessageSquare className="w-5 h-5" />
                 </div>
                 <div>
@@ -498,7 +492,7 @@ export const ContactSection: React.FC = () => {
                         href={`tel:${settings.phone}`}
                         className="flex-1 py-2.5 px-3 bg-white border border-stone-200 hover:bg-stone-50 text-stone-700 rounded-xl font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors"
                       >
-                        <Phone className="w-3.5 h-3.5 text-[#1C2B4A]" />
+                        <Phone className="w-3.5 h-3.5 text-[#111111]" />
                         <span>Appeler</span>
                       </a>
 
@@ -539,7 +533,7 @@ export const ContactSection: React.FC = () => {
                           onClick={() => handleTypeChange(item.type as MessageRequestType)}
                           className={`py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all border text-center cursor-pointer ${
                             requestType === item.type
-                              ? 'bg-[#1F1F1F] text-[#B8975A] border-[#1F1F1F] shadow-xs scale-102'
+                              ? 'bg-[#1F1F1F] text-[#C62828] border-[#1F1F1F] shadow-xs scale-102'
                               : 'bg-stone-50 hover:bg-stone-100 text-stone-700 border-stone-200'
                           }`}
                         >
@@ -553,7 +547,7 @@ export const ContactSection: React.FC = () => {
                   {requestType === 'order_special' && (
                     <div className="p-4 rounded-2xl bg-amber-50/50 border border-amber-200/80 space-y-3 animate-in fade-in duration-200">
                       <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900 uppercase tracking-wider">
-                        <Calendar className="w-3.5 h-3.5 text-[#1C2B4A]" />
+                        <Calendar className="w-3.5 h-3.5 text-[#111111]" />
                         <span>Date & Heure de l'événement</span>
                       </div>
 
@@ -568,7 +562,7 @@ export const ContactSection: React.FC = () => {
                             min={new Date().toISOString().split('T')[0]}
                             value={formState.reservationDate}
                             onChange={(e) => setFormState({ ...formState, reservationDate: e.target.value })}
-                            className="w-full text-xs p-2.5 rounded-xl border border-stone-300 bg-white focus:outline-none focus:border-[#1C2B4A]"
+                            className="w-full text-xs p-2.5 rounded-xl border border-stone-300 bg-white focus:outline-none focus:border-[#111111]"
                           />
                         </div>
 
@@ -579,7 +573,7 @@ export const ContactSection: React.FC = () => {
                           <select
                             value={formState.reservationTime}
                             onChange={(e) => setFormState({ ...formState, reservationTime: e.target.value })}
-                            className="w-full text-xs p-2.5 rounded-xl border border-stone-300 bg-white focus:outline-none focus:border-[#1C2B4A] font-medium"
+                            className="w-full text-xs p-2.5 rounded-xl border border-stone-300 bg-white focus:outline-none focus:border-[#111111] font-medium"
                           >
                             <optgroup label="Midi & Déjeuner">
                               <option value="11h30">11h30</option>
@@ -613,7 +607,7 @@ export const ContactSection: React.FC = () => {
                   {requestType === 'reservation' && (
                     <div className="p-4 rounded-2xl bg-amber-50/50 border border-amber-200/80 space-y-3 animate-in fade-in duration-200">
                       <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900 uppercase tracking-wider">
-                        <Calendar className="w-3.5 h-3.5 text-[#1C2B4A]" />
+                        <Calendar className="w-3.5 h-3.5 text-[#111111]" />
                         <span>Créneau & Nombre de personnes</span>
                       </div>
 
@@ -628,7 +622,7 @@ export const ContactSection: React.FC = () => {
                             min={new Date().toISOString().split('T')[0]}
                             value={formState.reservationDate}
                             onChange={(e) => setFormState({ ...formState, reservationDate: e.target.value })}
-                            className="w-full text-xs p-2.5 rounded-xl border border-stone-300 bg-white focus:outline-none focus:border-[#1C2B4A]"
+                            className="w-full text-xs p-2.5 rounded-xl border border-stone-300 bg-white focus:outline-none focus:border-[#111111]"
                           />
                         </div>
 
@@ -639,7 +633,7 @@ export const ContactSection: React.FC = () => {
                           <select
                             value={formState.reservationTime}
                             onChange={(e) => setFormState({ ...formState, reservationTime: e.target.value })}
-                            className="w-full text-xs p-2.5 rounded-xl border border-stone-300 bg-white focus:outline-none focus:border-[#1C2B4A] font-medium"
+                            className="w-full text-xs p-2.5 rounded-xl border border-stone-300 bg-white focus:outline-none focus:border-[#111111] font-medium"
                           >
                             <optgroup label="Midi (Déjeuner)">
                               <option value="11h45">11h45</option>
@@ -665,7 +659,7 @@ export const ContactSection: React.FC = () => {
                           <select
                             value={formState.guestsCount}
                             onChange={(e) => setFormState({ ...formState, guestsCount: Number(e.target.value) })}
-                            className="w-full text-xs p-2.5 rounded-xl border border-stone-300 bg-white focus:outline-none focus:border-[#1C2B4A] font-medium"
+                            className="w-full text-xs p-2.5 rounded-xl border border-stone-300 bg-white focus:outline-none focus:border-[#111111] font-medium"
                           >
                             {[1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 15, 20].map((n) => (
                               <option key={n} value={n}>
@@ -690,7 +684,7 @@ export const ContactSection: React.FC = () => {
                         placeholder="Votre nom et prénom"
                         value={formState.name}
                         onChange={(e) => setFormState({ ...formState, name: e.target.value })}
-                        className="w-full text-xs p-3 rounded-xl border border-stone-200 bg-stone-50/50 focus:bg-white focus:outline-none focus:border-[#1C2B4A]"
+                        className="w-full text-xs p-3 rounded-xl border border-stone-200 bg-stone-50/50 focus:bg-white focus:outline-none focus:border-[#111111]"
                       />
                     </div>
 
@@ -704,7 +698,7 @@ export const ContactSection: React.FC = () => {
                         placeholder="+261 34 00 000 00"
                         value={formState.phone}
                         onChange={(e) => setFormState({ ...formState, phone: e.target.value })}
-                        className="w-full text-xs p-3 rounded-xl border border-stone-200 bg-stone-50/50 focus:bg-white focus:outline-none focus:border-[#1C2B4A]"
+                        className="w-full text-xs p-3 rounded-xl border border-stone-200 bg-stone-50/50 focus:bg-white focus:outline-none focus:border-[#111111]"
                       />
                     </div>
                   </div>
@@ -720,7 +714,7 @@ export const ContactSection: React.FC = () => {
                         placeholder="votre@email.com"
                         value={formState.email}
                         onChange={(e) => setFormState({ ...formState, email: e.target.value })}
-                        className="w-full text-xs p-3 rounded-xl border border-stone-200 bg-stone-50/50 focus:bg-white focus:outline-none focus:border-[#1C2B4A]"
+                        className="w-full text-xs p-3 rounded-xl border border-stone-200 bg-stone-50/50 focus:bg-white focus:outline-none focus:border-[#111111]"
                       />
                     </div>
 
@@ -734,7 +728,7 @@ export const ContactSection: React.FC = () => {
                         placeholder="Ex. Réservation d'une grande table, etc."
                         value={formState.subject}
                         onChange={(e) => setFormState({ ...formState, subject: e.target.value })}
-                        className="w-full text-xs p-3 rounded-xl border border-stone-200 bg-stone-50/50 focus:bg-white focus:outline-none focus:border-[#1C2B4A]"
+                        className="w-full text-xs p-3 rounded-xl border border-stone-200 bg-stone-50/50 focus:bg-white focus:outline-none focus:border-[#111111]"
                       />
                     </div>
                   </div>
@@ -760,14 +754,14 @@ export const ContactSection: React.FC = () => {
                       }
                       value={formState.message}
                       onChange={(e) => setFormState({ ...formState, message: e.target.value })}
-                      className="w-full text-xs p-3 rounded-xl border border-stone-200 bg-stone-50/50 focus:bg-white focus:outline-none focus:border-[#1C2B4A]"
+                      className="w-full text-xs p-3 rounded-xl border border-stone-200 bg-stone-50/50 focus:bg-white focus:outline-none focus:border-[#111111]"
                     />
                   </div>
 
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-[#1C2B4A] hover:bg-[#0F1A30] text-white py-3.5 px-4 rounded-xl font-bold text-sm shadow-md shadow-[#1C2B4A]/25 transition-all transform active:scale-98 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    className="w-full bg-[#111111] hover:bg-[#000000] text-white py-3.5 px-4 rounded-xl font-bold text-sm shadow-md shadow-[#111111]/25 transition-all transform active:scale-98 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                   >
                     <Send className="w-4 h-4" />
                     <span>

@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
   X,
@@ -219,12 +218,12 @@ export const Hero: React.FC<HeroProps> = ({ onOpenCustomizer, isAdmin }) => {
   return (
     <section
       id="accueil"
-      className="relative w-full overflow-hidden bg-[#141414] select-none scroll-mt-32"
+      className="relative w-full overflow-hidden bg-[#141414] select-none"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      {/* Grande photo pleine largeur avec titre centré en serif italique */}
-      <div className="relative w-full h-[78vh] min-h-[520px] max-h-[860px] overflow-hidden">
+      {/* Photo plein écran, titre aligné à gauche en majuscules étroites */}
+      <div className="relative w-full h-screen min-h-[600px] max-h-[960px] overflow-hidden">
         {slides.map((slide, index) => {
           const isActive = index === currentIndex;
 
@@ -239,108 +238,82 @@ export const Hero: React.FC<HeroProps> = ({ onOpenCustomizer, isAdmin }) => {
               <img
                 src={slide.image}
                 alt={slide.imageAlt || slide.title}
-                className={`absolute inset-0 w-full h-full object-cover object-center transition-transform duration-[7000ms] ease-out ${
-                  isActive ? 'scale-105' : 'scale-100'
-                }`}
+                className="absolute inset-0 w-full h-full object-cover object-center"
                 loading={index === 0 ? 'eager' : 'lazy'}
                 referrerPolicy="no-referrer"
               />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/45 to-black/10 pointer-events-none" />
 
-              {/* Voile sombre uniforme pour la lisibilité du titre */}
-              <div className="absolute inset-0 bg-black/45 pointer-events-none" />
-
-              <div className="relative z-20 h-full max-w-5xl mx-auto px-6 flex flex-col items-center justify-center text-center">
-                {slide.tag && (
-                  <span className="label-caps text-[11px] sm:text-xs text-gold-light mb-5">{slide.tag}</span>
-                )}
-
-                <h1 className="font-serif italic text-white text-3xl sm:text-5xl lg:text-6xl leading-[1.15] tracking-tight drop-shadow-lg">
-                  {slide.title}
-                </h1>
-
-                <p className="mt-6 text-sm sm:text-base text-white/85 max-w-xl leading-relaxed font-light">
-                  {slide.description}
-                </p>
-
-                <button
-                  type="button"
-                  onClick={() => handlePrimaryAction(slide)}
-                  id={`hero-action-btn-${index}`}
-                  className="btn-outline mt-8 text-white hover:bg-white hover:text-ink"
+              <div className="relative z-20 h-full max-w-[1180px] mx-auto px-6 sm:px-10 flex flex-col justify-center pt-20">
+                <div
+                  className={`max-w-xl transition-all ${
+                    isActive ? 'opacity-100 translate-y-0 duration-700 delay-500' : 'opacity-0 translate-y-6 duration-200'
+                  }`}
                 >
-                  {slide.actionText || 'Commander'}
-                </button>
+                  {slide.tag && <span className="label-caps text-[11px] text-white/70">{slide.tag}</span>}
+
+                  <h1 className="mt-4 font-display uppercase text-white text-4xl sm:text-5xl lg:text-6xl leading-[1.08] tracking-[0.06em]">
+                    {slide.title}
+                  </h1>
+
+                  <p className="mt-5 text-sm sm:text-base text-white/85 leading-relaxed max-w-lg">{slide.description}</p>
+
+                  <button
+                    type="button"
+                    onClick={() => handlePrimaryAction(slide)}
+                    id={`hero-action-btn-${index}`}
+                    className="btn-outline mt-8 text-white hover:bg-white hover:text-ink hover:border-white"
+                  >
+                    {slide.actionText || 'Commander'}
+                  </button>
+                </div>
               </div>
             </div>
           );
         })}
 
-        {/* Indicateurs de diapositive : simples traits fins */}
-        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2">
+        {/* Navigation : flèches carrées noires + numéros */}
+        <div className="absolute bottom-8 right-6 sm:right-10 z-30 flex items-center gap-4">
+          <span className="font-display text-white/80 text-sm tracking-[0.2em]">
+            0{currentIndex + 1} <span className="text-white/40">/ 0{slides.length}</span>
+          </span>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              prevSlide();
+            }}
+            className="w-10 h-10 bg-black/80 hover:bg-accent text-white flex items-center justify-center transition-colors cursor-pointer"
+            aria-label="Diapositive précédente"
+          >
+            <ChevronLeft className="w-5 h-5" strokeWidth={1.5} />
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              nextSlide();
+            }}
+            className="w-10 h-10 bg-black/80 hover:bg-accent text-white flex items-center justify-center transition-colors cursor-pointer"
+            aria-label="Diapositive suivante"
+          >
+            <ChevronRight className="w-5 h-5" strokeWidth={1.5} />
+          </button>
+        </div>
+
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-30 hidden sm:flex items-center gap-2">
           {slides.map((slide, idx) => (
             <button
               key={`hero-dot-${idx}`}
               type="button"
               onClick={() => goToSlide(idx)}
-              className={`h-px transition-all duration-500 cursor-pointer ${
+              className={`h-[2px] transition-all duration-500 cursor-pointer ${
                 idx === currentIndex ? 'w-10 bg-white' : 'w-5 bg-white/40 hover:bg-white/70'
               }`}
               aria-label={`Aller à la diapositive ${idx + 1}`}
               title={slide.title || `Diapositive ${idx + 1}`}
             />
           ))}
-        </div>
-
-        {/* Flèche ronde vers la carte */}
-        <button
-          type="button"
-          onClick={scrollToMenu}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 w-11 h-11 rounded-full border border-white/80 text-white flex items-center justify-center hover:bg-white hover:text-ink transition-colors cursor-pointer animate-nudge"
-          aria-label="Voir la carte"
-        >
-          <ChevronDown className="w-5 h-5" strokeWidth={1.5} />
-        </button>
-
-        {/* Flèches précédente / suivante, très discrètes (bureau) */}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            prevSlide();
-          }}
-          className="hidden lg:flex absolute left-6 top-1/2 -translate-y-1/2 z-30 p-2 text-white/60 hover:text-white transition-colors cursor-pointer"
-          aria-label="Diapositive précédente"
-        >
-          <ChevronLeft className="w-8 h-8" strokeWidth={1} />
-        </button>
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            nextSlide();
-          }}
-          className="hidden lg:flex absolute right-6 top-1/2 -translate-y-1/2 z-30 p-2 text-white/60 hover:text-white transition-colors cursor-pointer"
-          aria-label="Diapositive suivante"
-        >
-          <ChevronRight className="w-8 h-8" strokeWidth={1} />
-        </button>
-      </div>
-
-      {/* Trois engagements, séparés par de fines bordures */}
-      <div className="bg-white">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-5">
-          <div className="grid grid-cols-1 md:grid-cols-3 border border-hairline md:divide-x divide-y md:divide-y-0 divide-hairline">
-            {[
-              { title: 'Produits frais', text: 'Ingrédients sélectionnés chaque matin auprès des producteurs locaux.' },
-              { title: 'Fait maison', text: 'Pâtes pétries, nems dorés et bouillons mijotés selon la tradition.' },
-              { title: 'Service rapide', text: 'Préparé minute, en livraison express ou à emporter.' },
-            ].map((item) => (
-              <div key={item.title} className="px-8 py-9 text-center">
-                <h3 className="font-serif text-lg text-cocoa">{item.title}</h3>
-                <p className="mt-2 text-sm text-stone-500 font-light leading-relaxed max-w-xs mx-auto">{item.text}</p>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
 
@@ -353,7 +326,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenCustomizer, isAdmin }) => {
             {/* Header */}
             <div className="px-6 py-4 border-b border-stone-200 flex items-center justify-between bg-stone-50">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-[#1C2B4A] text-white flex items-center justify-center">
+                <div className="w-9 h-9 rounded-xl bg-[#111111] text-white flex items-center justify-center">
                   <Layers className="w-5 h-5" />
                 </div>
                 <div>
@@ -384,7 +357,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenCustomizer, isAdmin }) => {
                   onClick={() => setEditingSlideIndex(idx)}
                   className={`pb-3 px-4 text-xs font-bold transition-all border-b-2 cursor-pointer ${
                     editingSlideIndex === idx
-                      ? 'border-[#1C2B4A] text-[#1C2B4A]'
+                      ? 'border-[#111111] text-[#111111]'
                       : 'border-transparent text-stone-500 hover:text-stone-800'
                   }`}
                 >
@@ -414,7 +387,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenCustomizer, isAdmin }) => {
                     })
                   }
                   placeholder="Ex: Le grand bol traditionnel fumant aux nems croustillants"
-                  className="w-full p-2.5 rounded-xl border border-stone-200 focus:outline-none focus:border-[#1C2B4A] bg-white text-sm"
+                  className="w-full p-2.5 rounded-xl border border-stone-200 focus:outline-none focus:border-[#111111] bg-white text-sm"
                 />
               </div>
 
@@ -432,7 +405,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenCustomizer, isAdmin }) => {
                     })
                   }
                   placeholder="Description détaillée du plat ou de la spécialité mise en avant..."
-                  className="w-full p-2.5 rounded-xl border border-stone-200 focus:outline-none focus:border-[#1C2B4A] bg-white text-xs leading-relaxed"
+                  className="w-full p-2.5 rounded-xl border border-stone-200 focus:outline-none focus:border-[#111111] bg-white text-xs leading-relaxed"
                 />
               </div>
 
@@ -451,7 +424,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenCustomizer, isAdmin }) => {
                       })
                     }
                     placeholder="Ex: Commander"
-                    className="w-full p-2.5 rounded-xl border border-stone-200 focus:outline-none focus:border-[#1C2B4A] bg-white text-xs"
+                    className="w-full p-2.5 rounded-xl border border-stone-200 focus:outline-none focus:border-[#111111] bg-white text-xs"
                   />
                 </div>
 
@@ -466,7 +439,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenCustomizer, isAdmin }) => {
                         actionTarget: e.target.value as 'customizer' | 'menu',
                       })
                     }
-                    className="w-full p-2.5 rounded-xl border border-stone-200 focus:outline-none focus:border-[#1C2B4A] bg-white text-xs cursor-pointer"
+                    className="w-full p-2.5 rounded-xl border border-stone-200 focus:outline-none focus:border-[#111111] bg-white text-xs cursor-pointer"
                   >
                     <option value="menu">Défiler vers le Menu de commande</option>
                     <option value="customizer">Ouvrir le Composeur de Soupe</option>
@@ -505,7 +478,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenCustomizer, isAdmin }) => {
                   type="button"
                   onClick={handleSaveSlides}
                   disabled={isSaving}
-                  className="bg-[#1C2B4A] hover:bg-[#0F1A30] text-white px-5 py-2 rounded-xl font-bold text-xs shadow-md transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                  className="bg-[#111111] hover:bg-[#000000] text-white px-5 py-2 rounded-xl font-bold text-xs shadow-md transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
                 >
                   {saveSuccess ? (
                     <>
