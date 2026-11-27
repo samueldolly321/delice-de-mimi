@@ -21,6 +21,7 @@ import { SocialIcon } from './SocialIcons';
 import { validateContactPair, HONEYPOT_FIELD } from '../utils/validation';
 import { trackEvent } from '../utils/analytics';
 import { resolveHomeContent } from '../data/homeContent';
+import { mapSrc, mapsLink } from '../utils/maps';
 import { ContactMessage, MessageRequestType } from '../types';
 
 export const ContactSection: React.FC = () => {
@@ -390,17 +391,19 @@ export const ContactSection: React.FC = () => {
               </div>
             </div>
 
-            {/* Google Maps réel (embed sans clé API) */}
+            {/* Google Maps (code « Intégrer une carte » de l'admin, sinon d'après l'adresse) */}
+            {mapSrc(settings) && (
             <div className="bg-white rounded-2xl border border-[#E6DECF] overflow-hidden shadow-xs relative aspect-[16/9]">
               <iframe
-                title={`Localisation ${settings.name}`}
-                src={`https://www.google.com/maps?q=${encodeURIComponent(settings.address)}&output=embed`}
+                title={`Plan d'accès — ${settings.name}`}
+                src={mapSrc(settings)}
+                allowFullScreen
                 className="absolute inset-0 w-full h-full border-0"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
               />
               <a
-                href={settings.googleMapsUrl || `https://maps.google.com/?q=${encodeURIComponent(settings.address)}`}
+                href={mapsLink(settings)}
                 target="_blank"
                 rel="noreferrer"
                 className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1F1F1F]/90 backdrop-blur-xs text-white text-xs font-semibold rounded-lg hover:bg-black transition-colors shadow-lg"
@@ -409,6 +412,7 @@ export const ContactSection: React.FC = () => {
                 <ExternalLink className="w-3 h-3" />
               </a>
             </div>
+            )}
           </div>
           </FadeIn>
 

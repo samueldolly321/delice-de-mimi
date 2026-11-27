@@ -7,7 +7,57 @@ export type OrderStatus =
   | 'Livrée' 
   | 'Annulée';
 
-export type ProductBadge = 'Populaire' | 'Nouveau' | 'Chef' | 'Promotion' | null;
+/** Identifiant d'étiquette : Populaire, Nouveau, Chef, Promotion ou une étiquette créée dans l'admin. */
+export type ProductBadge = string | null;
+
+/** Étiquette de plat (modifiable dans Réglages → Étiquettes). */
+export interface BadgeDef {
+  id: string;
+  label: string;
+  /** Couleur de fond (#rrggbb). */
+  bg: string;
+  /** Couleur du texte (#rrggbb). */
+  color: string;
+  /** Afficher un onglet de filtre dans la carte. */
+  filter: boolean;
+  /** Nom de l'onglet (vide = nom de l'étiquette). */
+  filterLabel?: string;
+}
+
+export type FeaturedImageFit = 'cover' | 'contain';
+export type FeaturedImageRatio = '1-1' | '4-3' | '3-2' | '16-9' | '3-4' | '4-5';
+export type FeaturedImageFocus = 'center' | 'top' | 'bottom' | 'left' | 'right';
+
+/** Bloc « Notre coup de cœur » : un plat mis en avant au-dessus de la carte. */
+export interface FeaturedSettings {
+  enabled?: boolean;
+  /** Plat mis en avant ('' = choix automatique : Spécialité du chef, sinon Populaire). */
+  productId?: string;
+  sectionTitle?: string;
+  sectionIntro?: string;
+  label?: string;
+  badge?: string;
+  /** Vide = nom du plat. */
+  title?: string;
+  /** Vide = description du plat. */
+  text?: string;
+  /** Points forts, un par ligne. */
+  highlights?: string;
+  /** Vide = photo du plat. */
+  image?: string;
+  imageFit?: FeaturedImageFit;
+  imageRatio?: FeaturedImageRatio;
+  imageFocus?: FeaturedImageFocus;
+  /** Ancien prix barré (0 = aucun). */
+  oldPrice?: number;
+  showPrice?: boolean;
+  showMeta?: boolean;
+  /** Vide = « Ajouter au panier » (ou « Composer ma soupe »). */
+  button?: string;
+  button2?: string;
+  imageSide?: 'left' | 'right';
+  background?: 'white' | 'paper' | 'dark';
+}
 
 export interface SoupTopping {
   id: string;
@@ -57,6 +107,14 @@ export interface HomeContent {
   // Section contact
   contactTitle?: string;
   contactIntro?: string;
+  /** Afficher la carte Google Maps dans la section Contact (vrai par défaut). */
+  mapShow?: boolean;
+  /** Code « Intégrer une carte » de Google Maps (ou son adresse src). Vide = carte d'après l'adresse. */
+  mapEmbed?: string;
+  /** Bloc « Notre coup de cœur ». */
+  featured?: FeaturedSettings;
+  /** Étiquettes des plats (vide = étiquettes d'origine). */
+  badges?: BadgeDef[];
 }
 
 export interface Product {

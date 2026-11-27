@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Check, X, Image as ImageIcon, Search, Flame, Tag } from 'lucide-react';
+import { Plus, Edit2, Trash2, Check, X, Image as ImageIcon, Search, Tag } from 'lucide-react';
 import { Product, Category, ProductBadge } from '../../types';
 import { api } from '../../services/api';
 import { ImageUploadInput } from '../common/ImageUploadInput';
+import { useCart } from '../../context/CartContext';
+import { resolveBadges, findBadge, badgeText } from '../../data/badges';
 
 interface ProductsManagerProps {
   products: Product[];
@@ -26,6 +28,8 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCat, setSelectedCat] = useState(defaultCategoryFilter || 'all');
   const [isSaving, setIsSaving] = useState(false);
+  const { settings } = useCart();
+  const badges = resolveBadges(settings);
 
   // Quick inline category creation from product form
   const [isQuickCatOpen, setIsQuickCatOpen] = useState(false);
@@ -194,7 +198,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({
                 <th className="p-3.5 pl-5">Plat</th>
                 <th className="p-3.5">Catégorie</th>
                 <th className="p-3.5">Prix</th>
-                <th className="p-3.5">Badge</th>
+                <th className="p-3.5">Étiquette</th>
                 <th className="p-3.5">Disponibilité</th>
                 <th className="p-3.5 pr-5 text-right">Actions</th>
               </tr>
@@ -229,27 +233,20 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({
                   </td>
 
                   <td className="p-3.5">
-                    {p.badge === 'Populaire' ? (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-amber-100 text-amber-800 border border-amber-300">
-                        <Flame className="w-3 h-3 text-amber-600 fill-amber-500" />
-                        Populaire
-                      </span>
-                    ) : p.badge === 'Nouveau' ? (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-emerald-100 text-emerald-800 border border-emerald-300">
-                        Nouveau
-                      </span>
-                    ) : p.badge === 'Chef' ? (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-red-100 text-[#C62828] border border-red-200">
-                        Chef
-                      </span>
-                    ) : p.badge === 'Promotion' ? (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-orange-100 text-orange-800 border border-orange-300" title={p.promoNote}>
-                        <Tag className="w-3 h-3 text-orange-600" />
-                        Promo{p.promoNote ? ` · ${p.promoNote}` : ''}
-                      </span>
-                    ) : (
-                      <span className="text-stone-400 text-[11px]">—</span>
-                    )}
+                    {(() => {
+                      const b = findBadge(badges, p.badge);
+                      return b ? (
+                        <span
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase"
+                          style={{ backgroundColor: b.bg, color: b.color }}
+                          title={p.promoNote || b.label}
+                        >
+                          {badgeText(b, p)}
+                        </span>
+                      ) : (
+                        <span className="text-stone-400 text-[11px]">—</span>
+                      );
+                    })()}
                   </td>
 
                   <td className="p-3.5">
@@ -391,7 +388,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                  <label className="font-bold text-stone-700 block mb-1">Badge</label>
+                  <label className="font-bold text-stone-700 block mb-1">Étiquette</label>
                   <select
                     value={editingProduct.badge || ''}
                     onChange={(e) =>
@@ -402,11 +399,13 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({
                     }
                     className="w-full p-2.5 rounded-xl border border-stone-200 focus:outline-none focus:border-[#C62828]"
                   >
-                    <option value="">Aucun badge</option>
-                    <option value="Populaire">Populaire</option>
-                    <option value="Nouveau">Nouveau</option>
-                    <option value="Chef">Chef</option>
-                    <option value="Promotion">Promotion</option>
+                    <option value="">Aucune étiquette</option>
+                    {badges.map((b) => (
+                      <option key={b.id} value={b.id}>{b.label}</option>
+                    ))}
+                    {editingProduct.badge && !findBadge(badges, editingProduct.badge) && (
+                      <option value={editingProduct.badge}>{editingProduct.badge} (supprimée)</option>
+                    )}
                   </select>
                 </div>
 
@@ -446,10 +445,10 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({
                 </div>
               </div>
 
-              {editingProduct.badge === 'Promotion' && (
+              {editingProduct.badge && (
                 <div>
                   <label className="font-bold text-stone-700 block mb-1">
-                    Détail de la promotion
+                    Texte de l'étiquette pour ce plat (facultatif)
                   </label>
                   <input
                     type="text"
@@ -465,7 +464,7 @@ export const ProductsManager: React.FC<ProductsManagerProps> = ({
                     className="w-full p-2.5 rounded-xl border border-amber-300 bg-amber-50/50 focus:outline-none focus:border-[#C62828]"
                   />
                   <p className="text-[10px] text-stone-500 mt-1">
-                    Ce texte s'affiche sur le badge Promotion, directement sur la carte du plat côté client.
+                    Remplace le nom de l'étiquette sur ce plat (ex. « -20 % ce week-end »). Vide = nom de l'étiquette. Couleurs et nouvelles étiquettes : Réglages → Étiquettes.
                   </p>
                 </div>
               )}

@@ -2,6 +2,7 @@ import React from 'react';
 import { useCart } from '../context/CartContext';
 import { DEFAULT_CHEF_INFO } from '../data/seedData';
 import { FadeIn } from './common/FadeIn';
+import { CountUp } from './common/CountUp';
 import { DEFAULT_HERO_SLIDES } from './Hero';
 import { resolveHomeContent } from '../data/homeContent';
 
@@ -94,10 +95,12 @@ export const ChefSection: React.FC = () => {
         {/* Chiffres clés */}
         <div className="mt-20 grid grid-cols-3 gap-6 text-center">
           {stats.map((s, i) => (
-            <div key={i}>
-              <div className="font-display text-4xl sm:text-5xl text-ink">{s.value}</div>
+            <FadeIn key={i} delay={i * 0.15}>
+              <div className="font-display text-4xl sm:text-5xl text-ink">
+                <CountUp value={s.value || ''} delay={i * 150} />
+              </div>
               <div className="mt-2 label-caps text-[10px] sm:text-[11px] text-stone-500">{s.label}</div>
-            </div>
+            </FadeIn>
           ))}
         </div>
       </div>

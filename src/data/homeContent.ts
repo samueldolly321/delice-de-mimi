@@ -9,7 +9,10 @@ export const DEFAULT_SERVICES: HomeServiceItem[] = [
   { icon: 'bike', title: 'Livraison rapide', text: 'Livraison express à domicile partout à Antananarivo.' },
 ];
 
-export const DEFAULT_HOME_CONTENT: Required<HomeContent> = {
+/** Textes de la page d'accueil (les réglages carte, vedette et étiquettes ont leurs propres fonctions). */
+export type HomeTexts = Required<Omit<HomeContent, 'mapShow' | 'mapEmbed' | 'featured' | 'badges'>>;
+
+export const DEFAULT_HOME_CONTENT: HomeTexts = {
   aboutTitle: 'Notre maison',
   aboutLabel: 'Notre histoire',
   aboutButton: 'Découvrir la carte',
@@ -36,10 +39,10 @@ export const DEFAULT_HOME_CONTENT: Required<HomeContent> = {
  * Contenu final de la page d'accueil : chaque champ rempli par l'admin
  * remplace la valeur par défaut ; un champ vidé revient au texte d'origine.
  */
-export function resolveHomeContent(settings?: Partial<RestaurantSettings> | null): Required<HomeContent> {
+export function resolveHomeContent(settings?: Partial<RestaurantSettings> | null): HomeTexts {
   const custom = settings?.home || {};
   const merged = { ...DEFAULT_HOME_CONTENT };
-  (Object.keys(DEFAULT_HOME_CONTENT) as (keyof HomeContent)[]).forEach((key) => {
+  (Object.keys(DEFAULT_HOME_CONTENT) as (keyof HomeTexts)[]).forEach((key) => {
     const value = custom[key];
     if (key === 'services') {
       const list = Array.isArray(value) ? (value as HomeServiceItem[]).filter((s) => s && (s.title || '').trim()) : [];

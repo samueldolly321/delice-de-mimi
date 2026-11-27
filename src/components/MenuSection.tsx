@@ -8,6 +8,7 @@ import { INITIAL_PRODUCTS } from '../data/seedData';
 import { resolveHomeContent } from '../data/homeContent';
 import { useCart } from '../context/CartContext';
 import { FadeIn } from './common/FadeIn';
+import { resolveBadges } from '../data/badges';
 
 interface MenuSectionProps {
   isCustomizerOpen?: boolean;
@@ -22,6 +23,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({
 }) => {
   const { settings } = useCart();
   const home = resolveHomeContent(settings);
+  const badges = resolveBadges(settings);
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -115,12 +117,8 @@ export const MenuSection: React.FC<MenuSectionProps> = ({
       let matchCategory = false;
       if (selectedCategory === 'all' || selectedCategory === 'cat-all') {
         matchCategory = true;
-      } else if (selectedCategory === 'populaire') {
-        matchCategory = p.badge === 'Populaire';
-      } else if (selectedCategory === 'nouveau') {
-        matchCategory = p.badge === 'Nouveau';
-      } else if (selectedCategory === 'chef') {
-        matchCategory = p.badge === 'Chef';
+      } else if (selectedCategory.startsWith('badge:')) {
+        matchCategory = p.badge === selectedCategory.slice(6);
       } else {
         const matchedCat = categories.find(
           (c) => c.id === selectedCategory || c.slug === selectedCategory
@@ -140,6 +138,8 @@ export const MenuSection: React.FC<MenuSectionProps> = ({
     });
   }, [products, categories, selectedCategory, searchQuery]);
 
+  const currentBadge = selectedCategory.startsWith('badge:') ? badges.find((b) => `badge:${b.id}` === selectedCategory) : undefined;
+
   const visibleCategories = categories
     .filter((c) => c.slug !== 'all' && c.id !== 'cat-all')
     .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
@@ -151,18 +151,17 @@ export const MenuSection: React.FC<MenuSectionProps> = ({
       isActive: selectedCategory === 'all' || selectedCategory === 'cat-all',
       onClick: () => setSelectedCategory('all'),
     },
-    {
-      key: 'populaire',
-      label: 'Populaires',
-      isActive: selectedCategory === 'populaire',
-      onClick: () => setSelectedCategory(selectedCategory === 'populaire' ? 'all' : 'populaire'),
-    },
-    {
-      key: 'nouveau',
-      label: 'Nouveautés',
-      isActive: selectedCategory === 'nouveau',
-      onClick: () => setSelectedCategory(selectedCategory === 'nouveau' ? 'all' : 'nouveau'),
-    },
+    ...badges
+      .filter((b) => b.filter)
+      .map((b) => {
+        const key = `badge:${b.id}`;
+        return {
+          key,
+          label: (b.filterLabel || '').trim() || b.label,
+          isActive: selectedCategory === key,
+          onClick: () => setSelectedCategory(selectedCategory === key ? 'all' : key),
+        };
+      }),
     ...visibleCategories.map((cat) => ({
       key: cat.slug || cat.id,
       label: cat.name,
@@ -186,7 +185,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({
             <button
               key={tab.key}
               onClick={tab.onClick}
-              id={`cat-tab-${tab.key}`}
+              id={`cat-tab-${tab.key.replace(':', '-')}`}
               className={`label-caps text-[11px] pb-1.5 border-b-2 transition-colors cursor-pointer ${
                 tab.isActive ? 'text-ink border-ink' : 'text-stone-500 border-transparent hover:text-ink'
               }`}
@@ -211,6 +210,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({
           <div className="text-[12px] text-stone-400">
             {filteredProducts.length} plat{filteredProducts.length > 1 ? 's' : ''}
             {currentCategoryObj && selectedCategory !== 'all' ? ` · ${currentCategoryObj.name}` : ''}
+            {currentBadge ? ` · ${(currentBadge.filterLabel || '').trim() || currentBadge.label}` : ''}
           </div>
         </div>
 
@@ -218,7 +218,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({
         {loading ? (
           <div className="mt-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-14">
             {[1, 2, 3, 4, 5, 6].map((n) => (
-              <div key={n} className="aspect-[3/2] bg-stone-200/70 animate-pulse" />
+              <div key={n} className="aspect-square bg-stone-200/70 animate-pulse" />
             ))}
           </div>
         ) : filteredProducts.length > 0 ? (

@@ -6,7 +6,10 @@ import { createServer as createViteServer } from 'vite';
 import { ProductBadge, Product, OrderItem, Customer } from './src/types';
 import * as store from './src/db/store';
 import { resolveAvailableToppings } from './src/data/homeContent';
-import { HomeContent, HomeServiceItem, SoupTopping, ServiceIconName } from './src/types';
+import { HomeContent, HomeServiceItem, SoupTopping, ServiceIconName, BadgeDef, FeaturedSettings } from './src/types';
+import { resolveBadges, normalizeHex } from './src/data/badges';
+import { DEFAULT_FEATURED, FEATURED_RATIOS, FEATURED_FOCUSES } from './src/data/featured';
+import { mapEmbedUrl } from './src/utils/maps';
 import fs from 'fs';
 import { validateContactPair, HONEYPOT_FIELD } from './src/utils/validation';
 import {
@@ -210,9 +213,11 @@ async function startServer() {
     return '';
   };
 
-  const validateBadge = (val: any): ProductBadge => {
-    if (val === 'Populaire' || val === 'Nouveau' || val === 'Chef' || val === 'Promotion') return val;
-    return null;
+  // Étiquette d'un plat : uniquement une étiquette existante (Réglages → Étiquettes).
+  const validateBadge = async (val: any): Promise<ProductBadge> => {
+    if (typeof val !== 'string' || !val) return null;
+    const badges = resolveBadges(await store.getSettings());
+    return badges.some((b) => b.id === val) ? val : null;
   };
 
   // Health check — indique aussi si la base PostgreSQL est réellement branchée
@@ -243,7 +248,7 @@ async function startServer() {
       categoryId: sanitizeText(body.categoryId, 50) || 'cat-plats',
       categoryName: sanitizeText(body.categoryName, 80) || 'Plats',
       image: sanitizeImage(body.image) || 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=800&q=80',
-      badge: validateBadge(body.badge),
+      badge: await validateBadge(body.badge),
       promoNote: sanitizeText(body.promoNote, 100) || undefined,
       isAvailable: body.isAvailable !== undefined ? Boolean(body.isAvailable) : true,
       preparationTime: sanitizeText(body.preparationTime, 30) || '15 min',
@@ -268,7 +273,7 @@ async function startServer() {
       const img = sanitizeImage(body.image);
       if (img) safeUpdates.image = img;
     }
-    if (body.badge !== undefined) safeUpdates.badge = validateBadge(body.badge);
+    if (body.badge !== undefined) safeUpdates.badge = await validateBadge(body.badge);
     if (body.promoNote !== undefined) safeUpdates.promoNote = sanitizeText(body.promoNote, 100);
     if (body.isAvailable !== undefined) safeUpdates.isAvailable = Boolean(body.isAvailable);
     if (body.preparationTime !== undefined) safeUpdates.preparationTime = sanitizeText(body.preparationTime, 30);
@@ -775,6 +780,67 @@ async function startServer() {
           text: sanitizeText(it?.text, 200),
         })).filter((it) => it.title);
       }
+      // Carte Google Maps de la section Contact
+      if (h.mapShow !== undefined) home.mapShow = Boolean(h.mapShow);
+      if (h.mapEmbed !== undefined) {
+        const raw = typeof h.mapEmbed === 'string' ? h.mapEmbed.trim() : '';
+        home.mapEmbed = mapEmbedUrl(raw);
+        if (raw && !home.mapEmbed) {
+          return res.status(400).json({
+            error: "Le code de la carte Google Maps n'a pas été reconnu. Dans Google Maps : Partager → « Intégrer une carte » → « Copier le code HTML », puis collez ce code (un lien court maps.app.goo.gl va plutôt dans « Lien Google Maps »).",
+          });
+        }
+      }
+
+      // Bloc « Notre coup de cœur »
+      if (h.featured && typeof h.featured === 'object') {
+        const f = h.featured as Record<string, unknown>;
+        const featured: FeaturedSettings = {
+          enabled: f.enabled !== false,
+          productId: sanitizeText(f.productId, 80),
+          sectionTitle: sanitizeText(f.sectionTitle, 100),
+          sectionIntro: sanitizeText(f.sectionIntro, 400),
+          label: sanitizeText(f.label, 80),
+          badge: sanitizeText(f.badge, 60),
+          title: sanitizeText(f.title, 120),
+          text: sanitizeText(f.text, 1200),
+          highlights: sanitizeText(f.highlights, 800),
+          image: sanitizeImage(f.image),
+          imageFit: f.imageFit === 'contain' ? 'contain' : 'cover',
+          imageRatio: typeof f.imageRatio === 'string' && f.imageRatio in FEATURED_RATIOS ? (f.imageRatio as FeaturedSettings['imageRatio']) : DEFAULT_FEATURED.imageRatio,
+          imageFocus: typeof f.imageFocus === 'string' && f.imageFocus in FEATURED_FOCUSES ? (f.imageFocus as FeaturedSettings['imageFocus']) : DEFAULT_FEATURED.imageFocus,
+          oldPrice: Math.max(0, Math.min(10_000_000, Math.round(Number(f.oldPrice) || 0))),
+          showPrice: f.showPrice !== false,
+          showMeta: f.showMeta !== false,
+          button: sanitizeText(f.button, 60),
+          button2: sanitizeText(f.button2, 60),
+          imageSide: f.imageSide === 'right' ? 'right' : 'left',
+          background: f.background === 'paper' || f.background === 'dark' ? f.background : 'white',
+        };
+        home.featured = featured;
+      }
+
+      // Étiquettes des plats
+      if (Array.isArray(h.badges)) {
+        const seen = new Set<string>();
+        const badges: BadgeDef[] = [];
+        for (const it of (h.badges as any[]).slice(0, 30)) {
+          const label = sanitizeText(it?.label, 40);
+          let id = (typeof it?.id === 'string' ? it.id : '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 50);
+          if (!label || !id || seen.has(id)) continue;
+          seen.add(id);
+          badges.push({
+            id,
+            label,
+            bg: normalizeHex(it?.bg, '#111111'),
+            color: normalizeHex(it?.color, '#ffffff'),
+            filter: Boolean(it?.filter),
+            filterLabel: sanitizeText(it?.filterLabel, 40),
+          });
+        }
+        home.badges = badges;
+      }
+
       safeUpdates.home = home;
     }
 

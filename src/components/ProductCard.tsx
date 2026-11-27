@@ -2,17 +2,13 @@ import React, { useState } from 'react';
 import { Plus, Check } from 'lucide-react';
 import { Product } from '../types';
 import { useCart } from '../context/CartContext';
+import { resolveBadges, findBadge, badgeText } from '../data/badges';
+import { sharperImage, sharperSrcSet } from '../data/featured';
 
 interface ProductCardProps {
   product: Product;
   onCustomize?: (product: Product) => void;
 }
-
-const BADGE_LABELS: Record<string, string> = {
-  Populaire: 'Populaire',
-  Nouveau: 'Nouveau',
-  Chef: 'Spécialité du chef',
-};
 
 /**
  * Fiche plat « visuel 2 » : photo avec le prix en rouge dans une étiquette
@@ -20,7 +16,7 @@ const BADGE_LABELS: Record<string, string> = {
  * puis un petit trait et le bouton d'ajout.
  */
 export const ProductCard: React.FC<ProductCardProps> = ({ product, onCustomize }) => {
-  const { addToCart, formatPrice } = useCart();
+  const { addToCart, formatPrice, settings } = useCart();
   const [justAdded, setJustAdded] = useState(false);
 
   const handleAdd = (e: React.MouseEvent) => {
@@ -36,11 +32,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onCustomize }
     }, 1200);
   };
 
-  const badgeLabel = product.badge
-    ? product.badge === 'Promotion'
-      ? product.promoNote || 'Promotion'
-      : BADGE_LABELS[product.badge] || product.badge
-    : null;
+  const badge = findBadge(resolveBadges(settings), product.badge);
+  const badgeLabel = badge ? badgeText(badge, product) : null;
 
   const details = [
     product.preparationTime,
@@ -50,9 +43,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onCustomize }
   return (
     <div id={`product-card-${product.id}`} className="group h-full flex flex-col">
       {/* Photo + étiquette de prix */}
-      <div className="relative aspect-[3/2] overflow-hidden bg-stone-200">
+      <div className="relative aspect-square overflow-hidden bg-stone-200">
         <img
-          src={product.image}
+          src={sharperImage(product.image, 800, 800)}
+          srcSet={sharperSrcSet(product.image, [600, 800, 1200], 1) || undefined}
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 380px"
           alt={product.name}
           className={`w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105 ${
             product.isAvailable ? '' : 'grayscale opacity-60'
@@ -61,8 +56,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onCustomize }
           referrerPolicy="no-referrer"
         />
 
-        {badgeLabel && (
-          <span className="absolute top-0 left-0 bg-black text-white label-caps text-[9px] px-3 py-1.5">{badgeLabel}</span>
+        {badge && badgeLabel && (
+          <span
+            className="absolute top-0 left-0 label-caps text-[9px] px-3 py-1.5"
+            style={{ backgroundColor: badge.bg, color: badge.color }}
+          >
+            {badgeLabel}
+          </span>
         )}
 
         <span className="absolute bottom-0 right-0 bg-white font-display text-accent text-[17px] tracking-wide px-5 py-2.5">
@@ -73,7 +73,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onCustomize }
       {/* Texte */}
       <h3 className="mt-7 label-caps text-[13px] text-ink leading-snug">{product.name}</h3>
       {product.description && (
-        <p className="mt-3 text-[14px] text-stone-500 leading-[1.7] line-clamp-2">{product.description}</p>
+        <p className="mt-3 text-[14px] text-stone-500 leading-[1.7] whitespace-pre-line">{product.description}</p>
       )}
       {details.length > 0 && <p className="mt-2 text-[12px] text-stone-400">{details.join(' · ')}</p>}
 

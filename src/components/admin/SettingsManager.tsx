@@ -27,10 +27,17 @@ import {
   Gift,
   LayoutTemplate,
   Soup,
+  Star,
+  Tag,
+  MapPin,
 } from 'lucide-react';
 import { RestaurantSettings, HeroSlide, ChefInfo } from '../../types';
 import { HomeContentEditor } from './HomeContentEditor';
 import { ToppingsEditor } from './ToppingsEditor';
+import { FeaturedEditor } from './FeaturedEditor';
+import { BadgesEditor } from './BadgesEditor';
+import { resolveBadges } from '../../data/badges';
+import { mapEmbedUrl, mapSrc } from '../../utils/maps';
 import { resolveAllToppings } from '../../data/homeContent';
 import { api } from '../../services/api';
 import { SocialIcon } from '../SocialIcons';
@@ -43,7 +50,7 @@ interface SettingsManagerProps {
   onRefresh: () => void;
 }
 
-type SettingsSection = 'identity' | 'notifications' | 'slides' | 'home' | 'toppings' | 'chef' | 'contact' | 'delivery' | 'loyalty' | 'social' | 'invoice' | 'security' | 'danger';
+type SettingsSection = 'identity' | 'notifications' | 'slides' | 'home' | 'featured' | 'badges' | 'toppings' | 'chef' | 'contact' | 'delivery' | 'loyalty' | 'social' | 'invoice' | 'security' | 'danger';
 
 export const SettingsManager: React.FC<SettingsManagerProps> = ({ settings, onRefresh }) => {
   const { refreshSettings, formatPrice } = useCart();
@@ -262,6 +269,8 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({ settings, onRe
     { id: 'notifications', label: 'Notifications Commandes (Email & Tél)', shortLabel: 'Notifications', icon: Bell },
     { id: 'slides', label: 'Diaporama Accueil (Slides)', shortLabel: 'Diaporama', icon: Layers },
     { id: 'home', label: "Page d'accueil (textes & photos)", shortLabel: "Page d'accueil", icon: LayoutTemplate },
+    { id: 'featured', label: 'Produit vedette (« Notre coup de cœur »)', shortLabel: 'Produit vedette', icon: Star },
+    { id: 'badges', label: 'Étiquettes des plats', shortLabel: 'Étiquettes', icon: Tag },
     { id: 'toppings', label: 'Garnitures de la soupe', shortLabel: 'Garnitures', icon: Soup },
     { id: 'chef', label: 'Le Chef & Histoire', shortLabel: 'Le Chef', icon: ChefHat },
     { id: 'contact', label: 'Coordonnées & Horaires', shortLabel: 'Coordonnées', icon: Phone },
@@ -968,6 +977,26 @@ SMTP_FROM="Saveurs d'Asie <contact@saveursdasie.mg>"`}
         </div>
       )}
 
+      {/* PRODUIT VEDETTE */}
+      {activeSection === 'featured' && (
+        <div className="bg-white p-5 sm:p-6 rounded-2xl border border-stone-200 shadow-2xs animate-in fade-in-50 duration-150">
+          <FeaturedEditor
+            value={formData.home?.featured || {}}
+            onChange={(featured) => setFormData({ ...formData, home: { ...(formData.home || {}), featured } })}
+          />
+        </div>
+      )}
+
+      {/* ÉTIQUETTES DES PLATS */}
+      {activeSection === 'badges' && (
+        <div className="bg-white p-5 sm:p-6 rounded-2xl border border-stone-200 shadow-2xs animate-in fade-in-50 duration-150">
+          <BadgesEditor
+            value={resolveBadges(formData)}
+            onChange={(badges) => setFormData({ ...formData, home: { ...(formData.home || {}), badges } })}
+          />
+        </div>
+      )}
+
       {/* GARNITURES DE LA SOUPE */}
       {activeSection === 'toppings' && (
         <div className="bg-white p-5 sm:p-6 rounded-2xl border border-stone-200 shadow-2xs animate-in fade-in-50 duration-150">
@@ -1206,6 +1235,55 @@ SMTP_FROM="Saveurs d'Asie <contact@saveursdasie.mg>"`}
               <p className="text-[10px] text-stone-500 mt-1">
                 Ouvrez votre emplacement sur Google Maps, cliquez sur « Partager » puis collez le lien ici. Sans ce lien, un lien de recherche sera généré automatiquement à partir de l'adresse ci-dessus (moins précis).
               </p>
+            </div>
+
+            <div className="sm:col-span-2 p-4 rounded-2xl border border-stone-200 bg-stone-50/60 space-y-3">
+              <div className="flex items-center gap-2 font-bold text-stone-800">
+                <MapPin className="w-4 h-4 text-[#C62828]" />
+                <span>Carte Google Maps de la section Contact</span>
+              </div>
+              <label className="flex items-center gap-2 text-stone-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.home?.mapShow !== false}
+                  onChange={(e) => setFormData({ ...formData, home: { ...(formData.home || {}), mapShow: e.target.checked } })}
+                  className="w-4 h-4 accent-[#C62828]"
+                />
+                <span>Afficher la carte</span>
+              </label>
+              <div>
+                <label className="font-semibold text-stone-700 block mb-1">Code de la carte (facultatif)</label>
+                <textarea
+                  rows={3}
+                  value={formData.home?.mapEmbed || ''}
+                  onChange={(e) => setFormData({ ...formData, home: { ...(formData.home || {}), mapEmbed: e.target.value } })}
+                  placeholder='<iframe src="https://www.google.com/maps/embed?pb=..." ...></iframe>'
+                  className="w-full p-2.5 rounded-xl border border-stone-200 focus:outline-none focus:border-[#C62828] font-mono text-[11px] bg-white"
+                />
+                <p className="text-[10px] text-stone-500 mt-1">
+                  Pour placer le repère exactement sur le restaurant : sur Google Maps, cherchez le restaurant (ou cliquez sur son emplacement), puis <strong>Partager → Intégrer une carte → Copier le code HTML</strong> et collez-le ici. Vide = carte centrée sur l'adresse ci-dessus (repère approximatif).
+                </p>
+                {(formData.home?.mapEmbed || '').trim() !== '' && !mapEmbedUrl(formData.home?.mapEmbed) && (
+                  <p className="text-[11px] text-red-600 mt-1 font-semibold">
+                    Ce code n'est pas reconnu : il faut le code « Intégrer une carte » (il commence par &lt;iframe src="https://www.google.com/maps/embed…). Un lien court maps.app.goo.gl va dans « Lien Google Maps » ci-dessus.
+                  </p>
+                )}
+              </div>
+              {mapSrc(formData) ? (
+                <div>
+                  <span className="text-[10px] text-stone-500 font-semibold">
+                    Aperçu ({mapEmbedUrl(formData.home?.mapEmbed) ? 'code collé' : "d'après l'adresse"})
+                  </span>
+                  <iframe
+                    title="Aperçu de la carte"
+                    src={mapSrc(formData)}
+                    loading="lazy"
+                    className="mt-1 w-full max-w-xl h-64 rounded-xl border border-stone-200 bg-white"
+                  />
+                </div>
+              ) : (
+                <p className="text-[11px] text-stone-500">Aucune carte affichée (case décochée ou adresse vide).</p>
+              )}
             </div>
 
             <div>

@@ -5,6 +5,7 @@ import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { ChefSection } from './components/ChefSection';
 import { MenuSection } from './components/MenuSection';
+import { FeaturedSection } from './components/FeaturedSection';
 import { SoupBand, Services } from './components/HouseSections';
 import { ContactSection } from './components/ContactSection';
 import { Footer } from './components/Footer';
@@ -206,6 +207,7 @@ function MainLayout() {
         <Hero onOpenCustomizer={handleOpenSoupCustomizer} isAdmin={isAdminLoggedIn} />
         <ChefSection />
         <SoupBand onOpenCustomizer={handleOpenSoupCustomizer} />
+        <FeaturedSection onOpenCustomizer={handleOpenSoupCustomizer} />
         <MenuSection
           isCustomizerOpen={isSoupCustomizerOpen}
           onOpenCustomizer={() => setIsSoupCustomizerOpen(true)}
